@@ -1,0 +1,100 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.storage.mongoStorage.pvcName }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.oobeyaMongo.labels.app }}
+spec:
+  storageClassName: {{ .Values.storage.mongoStorage.storageClassName }}
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.storage.mongoStorage.size }}
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.oobeyaMongo.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.oobeyaMongo.labels.app }}
+spec:
+  replicas: {{ .Values.oobeya.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.oobeyaMongo.labels.app }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.oobeyaMongo.labels.app }}
+    spec:
+      containers:
+        - name: {{ .Values.oobeyaMongo.name }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          image: {{ .Values.oobeyaMongo.image.repository }}
+          ports:
+            - containerPort: {{ .Values.oobeyaMongo.mongoPort }}
+          startupProbe:
+            tcpSocket:
+              port: {{ .Values.oobeyaMongo.mongoPort }}
+            periodSeconds: {{ .Values.oobeyaMongo.startupProbe.periodSeconds }}
+            failureThreshold: {{ .Values.oobeyaMongo.startupProbe.failureThreshold }}
+            timeoutSeconds: {{ .Values.oobeyaMongo.startupProbe.timeoutSeconds }}
+          readinessProbe:
+            tcpSocket:
+              port: {{ .Values.oobeyaMongo.mongoPort }}
+            periodSeconds: {{ .Values.oobeyaMongo.readinessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.oobeyaMongo.readinessProbe.failureThreshold }}
+            timeoutSeconds: {{ .Values.oobeyaMongo.readinessProbe.timeoutSeconds }}
+          resources:
+            limits:
+              cpu: {{ .Values.oobeyaMongo.resources.limits.cpu }}
+              memory: {{ .Values.oobeyaMongo.resources.limits.memory }}
+            requests:
+              cpu: {{ .Values.oobeyaMongo.resources.requests.cpu }}
+              memory: {{ .Values.oobeyaMongo.resources.requests.memory }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.oobeyaMongo.configMapName }}
+            - secretRef:
+                name: {{ .Values.oobeyaMongo.secretName }}
+          volumeMounts:
+            - name: {{ .Values.storage.mongoStorage.pvcName }}
+              mountPath: /data/db
+            - name: init-script
+              mountPath: /docker-entrypoint-initdb.d
+              readOnly: true
+      volumes:
+        - name: {{ .Values.storage.mongoStorage.pvcName }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.storage.mongoStorage.pvcName }}
+        - name: init-script
+          configMap:
+            name:  {{ .Values.oobeyaMongo.configMapName }}
+            defaultMode: 0755
+      imagePullSecrets:
+        - name: oobeya-secret
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.oobeyaMongo.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.oobeyaMongo.labels.app }}
+spec:
+  ports:
+    - name: "access"
+      port: {{ .Values.oobeyaMongo.mongoPort }}
+      targetPort: {{ .Values.oobeyaMongo.mongoPort }}
+  selector:
+    app: {{ .Values.oobeyaMongo.labels.app }}
+
+
+

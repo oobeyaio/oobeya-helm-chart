@@ -1,0 +1,46 @@
+{{- if .Values.ingressTraefik.enabled -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Values.oobeyaUiIngress.name }}-traefik
+  namespace: {{ .Values.namespace }}
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: {{ .Values.ingressTraefik.entryPoints | default "web" | quote }}
+spec:
+  rules:
+  - host: {{ .Values.ingressTraefik.host | quote }}
+    http:
+      paths:
+      # UI Path
+      - path: {{ .Values.oobeyaUiIngress.ingress.path }}
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Values.oobeyaUiIngress.name }}
+            port:
+              number: {{ .Values.oobeyaUiIngress.uiPort }}
+      # Dashboard Path
+      - path: {{ .Values.oobeyaDashboardIngress.ingress.path }}
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Values.oobeyaDashboardIngress.name }}
+            port:
+              number: {{ .Values.oobeyaDashboardIngress.dashboardPort }}
+      # Gateway API Path
+      - path: {{ .Values.oobeyaGatewayIngress.ingress.path }}
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Values.oobeyaGatewayIngress.name }}
+            port:
+              number: {{ .Values.oobeyaGatewayIngress.gatewayPort }}
+      # Gateway Docs Path
+      - path: {{ .Values.oobeyaGatewayIngress.ingress.path2 }}
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Values.oobeyaGatewayIngress.name }}
+            port:
+              number: {{ .Values.oobeyaGatewayIngress.gatewayPort }}
+{{- end }}

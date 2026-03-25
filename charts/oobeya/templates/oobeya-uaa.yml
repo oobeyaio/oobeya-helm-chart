@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.oobeyaUaa.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.oobeyaUaa.labels.app }}
+spec:
+  replicas: {{ .Values.oobeya.replicaCount }}
+  strategy:
+    type: {{ .Values.strategy.type | default "RollingUpdate" }}
+  selector:
+    matchLabels:
+      app: {{ .Values.oobeyaUaa.labels.app }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.oobeyaUaa.labels.app }}
+    spec:
+      containers:
+        - name: {{ .Values.oobeyaUaa.name }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          image: "{{ .Values.oobeyaUaa.image.repository }}:{{ .Values.beVersion }}"
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.oobeyaUaa.configMapName }}
+            - secretRef:
+                name: {{ .Values.oobeyaUaa.secretName }}
+          ports:
+            - containerPort: {{ .Values.oobeyaUaa.uaaPort }}
+            - containerPort: {{ .Values.oobeyaUaa.uaaApiPort }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.oobeyaUaa.healthPaths }}
+              port: {{ .Values.oobeyaUaa.uaaApiPort }}
+            initialDelaySeconds: {{ .Values.oobeyaUaa.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.oobeyaUaa.readinessProbe.periodSeconds }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.oobeyaUaa.healthPaths }}
+              port: {{ .Values.oobeyaUaa.uaaApiPort }}
+            initialDelaySeconds: {{ .Values.oobeyaUaa.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.oobeyaUaa.livenessProbe.periodSeconds }}
+          startupProbe:
+            httpGet:
+              path: {{ .Values.oobeyaUaa.healthPaths }}
+              port: {{ .Values.oobeyaUaa.uaaApiPort }}
+            failureThreshold: {{ .Values.oobeyaUaa.startupProbe.failureThreshold }}
+            periodSeconds: {{ .Values.oobeyaUaa.startupProbe.periodSeconds }}
+          resources:
+            limits:
+              cpu: {{ .Values.oobeyaUaa.resources.limits.cpu }}
+              memory: {{ .Values.oobeyaUaa.resources.limits.memory }}
+            requests:
+              cpu: {{ .Values.oobeyaUaa.resources.requests.cpu }}
+              memory: {{ .Values.oobeyaUaa.resources.requests.memory }}
+          volumeMounts:
+            {{- if and .Values.customSSL.secretSSL.enabled }}
+            - name: "{{ .Values.oobeyaUaa.name }}-ssl"
+              mountPath: {{ .Values.customSSL.secretSSL.mountPath }}
+              readOnly: true
+            {{- end }}
+      initContainers:
+        - name: {{ .Values.initContainers.name }}
+          image: {{ .Values.initContainers.image }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          command: ['sh', '-c', "until wget {{ .Values.initContainers.waitDashboardService }}:{{ .Values.initContainers.dashboardApiPort }}{{ .Values.oobeyaDashboard.healthPaths }}; do echo waiting for myservice; sleep 2; done"]
+      volumes:
+        {{- if and .Values.customSSL.secretSSL.enabled }}
+        - name: "{{ .Values.oobeyaUaa.name }}-ssl"
+          secret:
+            secretName: {{ .Values.customSSL.secretSSL.name }}
+        {{- end }}
+      imagePullSecrets:
+        - name: oobeya-secret
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.oobeyaUaa.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.oobeyaUaa.labels.app }}
+spec:
+  ports:
+    - name: "access"
+      port: {{ .Values.oobeyaUaa.uaaPort }}
+      targetPort: {{ .Values.oobeyaUaa.uaaPort }}
+    - name: "api"
+      port: {{ .Values.oobeyaUaa.uaaApiPort }}
+      targetPort: {{ .Values.oobeyaUaa.uaaApiPort }}
+  selector:
+    app: {{ .Values.oobeyaUaa.labels.app }}
+
+

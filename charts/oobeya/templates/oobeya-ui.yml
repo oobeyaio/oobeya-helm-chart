@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.oobeyaUi.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.oobeyaUi.labels.app }}
+spec:
+  replicas: {{ .Values.oobeya.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.oobeyaUi.labels.app }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.oobeyaUi.labels.app }}
+    spec:
+      containers:
+        - name: {{ .Values.oobeyaUi.name }}
+          image: "{{ .Values.oobeyaUi.image.repository }}:{{ .Values.uiVersion }}"
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          ports:
+            - containerPort: {{ .Values.oobeyaUi.uiPort }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.oobeyaUi.healthPaths }}
+              port: {{ .Values.oobeyaUi.uiPort }}
+            initialDelaySeconds: {{ .Values.oobeyaUi.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.oobeyaUi.readinessProbe.periodSeconds }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.oobeyaUi.healthPaths }}
+              port: {{ .Values.oobeyaUi.uiPort }}
+            initialDelaySeconds: {{ .Values.oobeyaUi.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.oobeyaUi.livenessProbe.periodSeconds }}
+          resources:
+            limits:
+              cpu: {{ .Values.oobeyaUi.resources.limits.cpu }}
+              memory: {{ .Values.oobeyaUi.resources.limits.memory }}
+            requests:
+              cpu: {{ .Values.oobeyaUi.resources.requests.cpu }}
+              memory: {{ .Values.oobeyaUi.resources.requests.memory }}
+      imagePullSecrets:
+        - name: oobeya-secret
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.oobeyaUi.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.oobeyaUi.labels.app }}
+spec:
+  ports:
+    - name: "access"
+      port: {{ .Values.oobeyaUi.uiApiPort }}
+      targetPort: {{ .Values.oobeyaUi.uiPort }}
+  selector:
+    app: {{ .Values.oobeyaUi.labels.app }}
+

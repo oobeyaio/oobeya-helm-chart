@@ -1,0 +1,50 @@
+{{- if .Values.ingressNginx.enabled -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Values.oobeyaUiIngress.name }}-nginx
+  namespace: {{ .Values.namespace }}
+  annotations:
+    kubernetes.io/ingress.class: {{ .Values.ingressNginx.className | default "nginx" }}
+    {{- with .Values.ingressNginx.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  ingressClassName: {{ .Values.ingressNginx.className | default "nginx" }}
+  rules:
+  - host: {{ .Values.ingressNginx.host | quote }}
+    http:
+      paths:
+      # UI Path
+      - path: {{ .Values.oobeyaUiIngress.ingress.path }}
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Values.oobeyaUiIngress.name }}
+            port:
+              number: {{ .Values.oobeyaUiIngress.uiPort }}
+      # Dashboard Path
+      - path: {{ .Values.oobeyaDashboardIngress.ingress.path }}
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Values.oobeyaDashboardIngress.name }}
+            port:
+              number: {{ .Values.oobeyaDashboardIngress.dashboardPort }}
+      # Gateway API Path
+      - path: {{ .Values.oobeyaGatewayIngress.ingress.path }}
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Values.oobeyaGatewayIngress.name }}
+            port:
+              number: {{ .Values.oobeyaGatewayIngress.gatewayPort }}
+      # Gateway Docs Path
+      - path: {{ .Values.oobeyaGatewayIngress.ingress.path2 }}
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Values.oobeyaGatewayIngress.name }}
+            port:
+              number: {{ .Values.oobeyaGatewayIngress.gatewayPort }}
+{{- end }}

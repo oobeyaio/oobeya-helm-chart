@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.oobeyaGateway.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.oobeyaGateway.labels.app }}
+spec:
+  replicas: {{ .Values.oobeya.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.oobeyaGateway.labels.app }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.oobeyaGateway.labels.app }}
+    spec:
+      containers:
+        - name: {{ .Values.oobeyaGateway.name }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          image: "{{ .Values.oobeyaGateway.image.repository }}:{{ .Values.beVersion }}"
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.oobeyaGateway.configMapName }}
+            - secretRef:
+                name: {{ .Values.oobeyaGateway.secretName }}
+          ports:
+            - containerPort: {{ .Values.oobeyaGateway.gatewayPort }}
+            - containerPort: {{ .Values.oobeyaGateway.gatewayApiPort }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.oobeyaGateway.healthPaths }}
+              port: {{ .Values.oobeyaGateway.gatewayApiPort }}
+            initialDelaySeconds: {{ .Values.oobeyaGateway.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.oobeyaGateway.readinessProbe.periodSeconds }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.oobeyaGateway.healthPaths }}
+              port: {{ .Values.oobeyaGateway.gatewayApiPort }}
+            initialDelaySeconds: {{ .Values.oobeyaGateway.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.oobeyaGateway.livenessProbe.periodSeconds }}
+          startupProbe:
+            httpGet:
+              path: {{ .Values.oobeyaGateway.healthPaths }}
+              port: {{ .Values.oobeyaGateway.gatewayApiPort }}
+            failureThreshold: {{ .Values.oobeyaGateway.startupProbe.failureThreshold }}
+            periodSeconds: {{ .Values.oobeyaGateway.startupProbe.periodSeconds }}
+          resources:
+            limits:
+              cpu: {{ .Values.oobeyaGateway.resources.limits.cpu }}
+              memory: {{ .Values.oobeyaGateway.resources.limits.memory }}
+            requests:
+              cpu: {{ .Values.oobeyaGateway.resources.requests.cpu }}
+              memory: {{ .Values.oobeyaGateway.resources.requests.memory }}
+      initContainers:
+        - name: {{ .Values.initContainers.name }}
+          image: {{ .Values.initContainers.image }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          command: ['sh', '-c', "until wget {{ .Values.initContainers.waitUaaService }}:{{ .Values.initContainers.uaaApiPort }}{{ .Values.oobeyaUaa.healthPaths }}; do echo waiting for myservice; sleep 2; done"]
+      imagePullSecrets:
+        - name: oobeya-secret
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.oobeyaGateway.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.oobeyaGateway.labels.app }}
+spec:
+  ports:
+    - name: "access"
+      port: {{ .Values.oobeyaGateway.gatewayPort }}
+      targetPort: {{ .Values.oobeyaGateway.gatewayPort }}
+    - name: "api"
+      port: {{ .Values.oobeyaGateway.gatewayApiPort }}
+      targetPort: {{ .Values.oobeyaGateway.gatewayApiPort }}
+  selector:
+    app: {{ .Values.oobeyaGateway.labels.app }}
+
+

@@ -1,0 +1,374 @@
+oobeya:
+  name: oobeya
+  replicaCount: 1
+
+namespace: oobeya
+
+strategy:
+  type: Recreate
+
+imagePullPolicy: Always
+
+# Set Version
+uiVersion: 2.0.548
+beVersion: 2.0.834
+
+storage:
+    mongoStorage:
+      pvcName: oobeya-mongo-pvc
+      storageClassName: local-path                      # StorageClass Name
+      size: 100Gi                                       # Storage Size
+    gitwiserStorage:
+      enabled: true
+      pvcName: oobeya-gitwiser-pvc
+      storageClassName: local-path                      # StorageClass Name
+      size: 20Gi                                        # Storage Size
+
+oobeyaMongo:
+    name: oobeya-mongo
+    image:
+      repository: oobeya.azurecr.io/oobeya-mongo-8.0
+      tag: latest
+    mongoPort: 27017
+    labels:
+      app: oobeya-mongo
+    startupProbe:
+      periodSeconds: 5
+      failureThreshold: 60
+      timeoutSeconds: 2
+    readinessProbe:
+      periodSeconds: 5
+      failureThreshold: 15
+      timeoutSeconds: 2
+    resources:
+      limits:
+        cpu: 2
+        memory: 8Gi
+      requests:
+        cpu: 0.5
+        memory: 512Mi
+    configMapName: mongo-configmap
+    secretName: mongo-secret
+
+oobeyaDashboard:
+    name: oobeya-dashboard
+    image:
+      repository: oobeya.azurecr.io/oobeya-dashboard
+      tag: "{{ .Values.beVersion }}"
+    dashboardPort: 8080
+    dashboardApiPort: 58080
+    healthPaths: "/actuator/health"
+    labels:
+      app: oobeya-dashboard
+    readinessProbe:
+      initialDelaySeconds: 0
+      periodSeconds: 5
+    livenessProbe:
+      initialDelaySeconds: 180
+      periodSeconds: 60
+    startupProbe:
+      failureThreshold: 60
+      periodSeconds: 5
+    resources:
+      limits:
+        cpu: 2
+        memory: 2Gi
+      requests:
+        cpu: 0.25
+        memory: 256Mi
+    configMapName: dashboard-configmap
+    secretName: dashboard-secret
+    corsAllowedOrigin: "http://your-IP-or-Domain"       # Your DNS or IP address
+
+oobeyaGateway:
+    name: oobeya-gateway
+    image:
+      repository: oobeya.azurecr.io/oobeya-gateway
+      tag: "{{ .Values.beVersion }}"
+    gatewayPort: 8099
+    gatewayApiPort: 58099
+    healthPaths: "/actuator/health"
+    labels:
+      app: oobeya-gateway
+    readinessProbe:
+      initialDelaySeconds: 0
+      periodSeconds: 5
+    livenessProbe:
+      initialDelaySeconds: 300
+      periodSeconds: 60
+    startupProbe:
+      failureThreshold: 60
+      periodSeconds: 5
+    resources:
+      limits:
+        cpu: 0.5
+        memory: 1Gi
+      requests:
+        cpu: 0.25
+        memory: 256Mi
+    configMapName: gateway-configmap
+    secretName: gateway-secret
+    corsAllowedOrigin: "http://your-IP-or-Domain"       # Your DNS or IP address
+    gatewayBaseOrigin: "http://your-IP-or-Domain"       # Your DNS or IP address
+
+oobeyaUi:
+    name: oobeya-ui
+    image:
+      repository: oobeya.azurecr.io/oobeya-ui
+      tag: "{{ .Values.uiVersion }}"
+    uiPort: 80
+    uiApiPort: 4200
+    healthPaths: "/healthz"
+    labels:
+      app: oobeya-ui
+    readinessProbe:
+      initialDelaySeconds: 5
+      periodSeconds: 10
+    livenessProbe:
+      initialDelaySeconds: 30
+      periodSeconds: 60
+    resources:
+      limits:
+        cpu: 0.25
+        memory: 512Mi
+      requests:
+        cpu: 0.25
+        memory: 128Mi
+
+oobeyaGitwiser:
+    name: oobeya-gitwiser
+    image:
+      repository: oobeya.azurecr.io/oobeya-gitwiser
+      tag: "{{ .Values.beVersion }}"
+    gitwiserPort: 8077
+    gitwiserApiPort: 58077
+    healthPaths: "/actuator/health"
+    labels:
+      app: oobeya-gitwiser
+    readinessProbe:
+      initialDelaySeconds: 0
+      periodSeconds: 5
+    livenessProbe:
+      initialDelaySeconds: 300
+      periodSeconds: 60
+    startupProbe:
+      failureThreshold: 60
+      periodSeconds: 5
+    resources:
+      limits:
+        cpu: 2
+        memory: 8Gi
+      requests:
+        cpu: 0.25
+        memory: 512Mi
+    configMapName: gitwiser-configmap
+    secretName: gitwiser-secret
+
+oobeyaAddons:
+    name: oobeya-addons
+    image:
+      repository: oobeya.azurecr.io/oobeya-addons
+      tag: "{{ .Values.beVersion }}"
+    addonsPort: 8079
+    addonsApiPort: 58079
+    healthPaths: "/actuator/health"
+    labels:
+      app: oobeya-addons
+    readinessProbe:
+      initialDelaySeconds: 0
+      periodSeconds: 5
+    livenessProbe:
+      initialDelaySeconds: 300
+      periodSeconds: 60
+    startupProbe:
+      failureThreshold: 60
+      periodSeconds: 5
+    resources:
+      limits:
+        cpu: 1
+        memory: 4Gi
+      requests:
+        cpu: 0.20
+        memory: 512Mi
+    configMapName: addons-configmap
+    secretName: addons-secret
+
+oobeyaAgilespace:
+    name: oobeya-agilespace
+    image:
+      repository: oobeya.azurecr.io/oobeya-agilespace
+      tag: "{{ .Values.beVersion }}"
+    agilespacePort: 8074
+    agilespaceApiPort: 58074
+    healthPaths: "/actuator/health"
+    labels:
+      app: oobeya-agilespace
+    readinessProbe:
+      initialDelaySeconds: 0
+      periodSeconds: 5
+    livenessProbe:
+      initialDelaySeconds: 300
+      periodSeconds: 60
+    startupProbe:
+      failureThreshold: 60
+      periodSeconds: 5
+    resources:
+      limits:
+        cpu: 1
+        memory: 4Gi
+      requests:
+        cpu: 0.25
+        memory: 512Mi
+    configMapName: agilespace-configmap
+    secretName: agilespace-secret
+
+oobeyaDevteam:
+    name: oobeya-devteam
+    image:
+      repository: oobeya.azurecr.io/oobeya-devteam
+      tag: "{{ .Values.beVersion }}"
+    devteamPort: 8078
+    devteamApiPort: 58078
+    healthPaths: "/actuator/health"
+    labels:
+      app: oobeya-devteam
+    readinessProbe:
+      initialDelaySeconds: 0
+      periodSeconds: 5
+    livenessProbe:
+      initialDelaySeconds: 300
+      periodSeconds: 60
+    startupProbe:
+      failureThreshold: 60
+      periodSeconds: 5
+    resources:
+      limits:
+        cpu: 0.5
+        memory: 1Gi
+      requests:
+        cpu: 0.25
+        memory: 256Mi
+    configMapName: devteam-configmap
+    secretName: devteam-secret
+
+oobeyaUaa:
+    name: oobeya-uaa
+    image:
+      repository: oobeya.azurecr.io/oobeya-uaa
+      tag: "{{ .Values.beVersion }}"
+    uaaPort: 10000
+    uaaApiPort: 10001
+    healthPaths: "/actuator/health"
+    labels:
+      app: oobeya-uaa
+    readinessProbe:
+      initialDelaySeconds: 0
+      periodSeconds: 5
+    livenessProbe:
+      initialDelaySeconds: 300
+      periodSeconds: 60
+    startupProbe:
+      failureThreshold: 60
+      periodSeconds: 5
+    resources:
+      limits:
+        cpu: 1
+        memory: 1Gi
+      requests:
+        cpu: 0.25
+        memory: 256Mi
+    configMapName: uaa-configmap
+    secretName: uaa-secret
+
+oobeyaRabbitmq:
+    name: oobeya-rabbitmq
+    image:
+      repository: oobeya.azurecr.io/oobeya-rabbitmq
+      tag: latest
+    rabbitmqPort:  5672
+    rabbitmqGuiPort: 15672
+    labels:
+      app: oobeya-rabbitmq
+    resources:
+      limits:
+        cpu: 1
+        memory: 512Mi
+      requests:
+        cpu: 0.25
+        memory: 256Mi
+    configMapName: rabbitmq-configmap
+
+initContainers:
+    name: wait-oobeya-pods
+    image: oobeya.azurecr.io/oobeya-busybox:latest
+    waitMongoService: "oobeya-mongo.oobeya.svc.cluster.local"
+    waitDashboardService: "oobeya-dashboard"
+    waitUaaService: "oobeya-uaa"
+    mongoPort: 27017
+    dashboardApiPort: 58080
+    uaaApiPort: 10001
+
+customSSL:
+    secretSSL:
+      enabled: false
+      name: ""
+      mountPath: "/srv/certs"
+      certFileNames:
+          - ""
+          - ""
+          - ""
+
+ingressNginx:
+  enabled: false
+  className: "nginx"
+  host: "oobeya.local"
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+
+ingressTraefik:
+  enabled: false
+  host: "oobeya-traefik.local"
+  entryPoints: "web"
+    
+oobeyaUiIngress:
+  name: oobeya-ui
+  image:
+    repository: oobeya.azurecr.io/oobeya-ui
+    tag: "{{ .Values.uiVersion }}"
+  uiPort: 80
+  uiApiPort: 4200
+  labels:
+    app: oobeya-ui
+  ingress:
+    enabled: true
+    path: /
+    ingressClass: nginx
+
+oobeyaDashboardIngress:
+  name: oobeya-dashboard
+  image:
+    repository: oobeya.azurecr.io/oobeya-dashboard
+    tag: "{{ .Values.beVersion }}"
+  dashboardPort: 8080
+  labels:
+    app: oobeya-dashboard
+  ingress:
+    enabled: true
+    path: /api
+    ingressClass: nginx
+
+oobeyaGatewayIngress:
+  name: oobeya-gateway
+  image:
+    repository: oobeya.azurecr.io/oobeya-gateway
+    tag: "{{ .Values.beVersion }}"
+  gatewayPort: 8099
+  labels:
+    app: oobeya-gateway
+  ingress:
+    enabled: true
+    path: /apis
+    ingressClass: nginx
+    path2: /v3/api-docs
+
+

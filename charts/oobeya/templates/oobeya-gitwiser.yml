@@ -1,0 +1,129 @@
+{{- if .Values.storage.gitwiserStorage.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.storage.gitwiserStorage.pvcName }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.oobeyaGitwiser.labels.app }}
+spec:
+  storageClassName: {{ .Values.storage.gitwiserStorage.storageClassName }}
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.storage.gitwiserStorage.size }}
+{{- end }}
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.oobeyaGitwiser.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.oobeyaGitwiser.labels.app }}
+spec:
+  replicas: {{ .Values.oobeya.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.oobeyaGitwiser.labels.app }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.oobeyaGitwiser.labels.app }}
+    spec:
+      containers:
+        - image: "{{ .Values.oobeyaGitwiser.image.repository }}:{{ .Values.beVersion }}"
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          name: {{ .Values.oobeyaGitwiser.name }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.oobeyaGitwiser.configMapName }}
+            - secretRef:
+                name: {{ .Values.oobeyaGitwiser.secretName }}
+            - secretRef:
+                name: {{ .Values.oobeyaDashboard.secretName }}
+            - secretRef:
+                name: {{ .Values.oobeyaDevteam.secretName }}
+          ports:
+            - containerPort: {{ .Values.oobeyaGitwiser.gitwiserPort }}
+            - containerPort: {{ .Values.oobeyaGitwiser.gitwiserApiPort }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.oobeyaGitwiser.healthPaths }}
+              port: {{ .Values.oobeyaGitwiser.gitwiserApiPort }}
+            initialDelaySeconds: {{ .Values.oobeyaGitwiser.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.oobeyaGitwiser.readinessProbe.periodSeconds }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.oobeyaGitwiser.healthPaths }}
+              port: {{ .Values.oobeyaGitwiser.gitwiserApiPort }}
+            initialDelaySeconds: {{ .Values.oobeyaGitwiser.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.oobeyaGitwiser.livenessProbe.periodSeconds }}
+          startupProbe:
+            httpGet:
+              path: {{ .Values.oobeyaGitwiser.healthPaths }}
+              port: {{ .Values.oobeyaGitwiser.gitwiserApiPort }}
+            failureThreshold: {{ .Values.oobeyaGitwiser.startupProbe.failureThreshold }}
+            periodSeconds: {{ .Values.oobeyaGitwiser.startupProbe.periodSeconds }}
+          resources:
+            limits:
+              cpu: {{ .Values.oobeyaGitwiser.resources.limits.cpu }}
+              memory: {{ .Values.oobeyaGitwiser.resources.limits.memory }}
+            requests:
+              cpu: {{ .Values.oobeyaGitwiser.resources.requests.cpu }}
+              memory: {{ .Values.oobeyaGitwiser.resources.requests.memory }}
+          volumeMounts:
+            - mountPath: /tmp/gitwiser
+              name: "{{ .Values.oobeyaGitwiser.name }}-storage1"
+            {{- if and .Values.customSSL.secretSSL.enabled }}
+            - name: "{{ .Values.oobeyaGitwiser.name }}-ssl"
+              mountPath: {{ .Values.customSSL.secretSSL.mountPath }}
+              readOnly: true
+            {{- end }}
+      initContainers:
+        - name: {{ .Values.initContainers.name }}
+          image: {{ .Values.initContainers.image }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          command: ['sh', '-c', "until wget {{ .Values.initContainers.waitUaaService }}:{{ .Values.initContainers.uaaApiPort }}{{ .Values.oobeyaUaa.healthPaths }}; do echo waiting for myservice; sleep 2; done"]
+      restartPolicy: Always
+      volumes:
+        - name: "{{ .Values.oobeyaGitwiser.name }}-storage1"
+          {{- if .Values.storage.gitwiserStorage.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.storage.gitwiserStorage.pvcName }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        {{- if .Values.customSSL.secretSSL.enabled }}
+        - name: "{{ .Values.oobeyaGitwiser.name }}-ssl"
+          secret:
+            secretName: {{ .Values.customSSL.secretSSL.name }}
+        {{- end }}
+      imagePullSecrets:
+        - name: oobeya-secret
+        
+---
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.oobeyaGitwiser.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.oobeyaGitwiser.labels.app }}
+spec:
+  ports:
+    - name: "access"
+      port: {{ .Values.oobeyaGitwiser.gitwiserPort }}
+      targetPort: {{ .Values.oobeyaGitwiser.gitwiserPort }}
+    - name: "api"
+      port: {{ .Values.oobeyaGitwiser.gitwiserApiPort }}
+      targetPort: {{ .Values.oobeyaGitwiser.gitwiserApiPort }}
+  selector:
+    app: {{ .Values.oobeyaGitwiser.labels.app }}
+
+

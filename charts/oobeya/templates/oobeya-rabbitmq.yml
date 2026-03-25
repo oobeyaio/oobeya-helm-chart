@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.oobeyaRabbitmq.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.oobeyaRabbitmq.labels.app }}
+spec:
+  replicas: {{ .Values.oobeya.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.oobeyaRabbitmq.labels.app }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.oobeyaRabbitmq.labels.app }}
+    spec:
+      containers:
+        - name: {{ .Values.oobeyaRabbitmq.name }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          image: {{ .Values.oobeyaRabbitmq.image.repository }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.oobeyaRabbitmq.configMapName }}
+          ports:
+            - containerPort: {{ .Values.oobeyaRabbitmq.rabbitmqPort }}
+            - containerPort: {{ .Values.oobeyaRabbitmq.rabbitmqGuiPort }}
+          resources:
+            limits:
+              cpu: {{ .Values.oobeyaRabbitmq.resources.limits.cpu }}
+              memory: {{ .Values.oobeyaRabbitmq.resources.limits.memory }}
+            requests:
+              cpu: {{ .Values.oobeyaRabbitmq.resources.requests.cpu }}
+              memory: {{ .Values.oobeyaRabbitmq.resources.requests.memory }}
+          volumeMounts:
+            - name: "{{ .Values.oobeyaRabbitmq.name }}-storage"
+              mountPath: /var/lib/rabbitmq
+      volumes:
+        - name: "{{ .Values.oobeyaRabbitmq.name }}-storage"
+          emptyDir: {}
+      imagePullSecrets:
+        - name: oobeya-secret
+
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.oobeyaRabbitmq.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.oobeyaRabbitmq.labels.app }}
+spec:
+  selector:
+    app: {{ .Values.oobeyaRabbitmq.labels.app }}
+  ports:
+  - name: "access" 
+    port: {{ .Values.oobeyaRabbitmq.rabbitmqPort }}
+    targetPort: {{ .Values.oobeyaRabbitmq.rabbitmqPort }}
+  - name: "gui"
+    port: {{ .Values.oobeyaRabbitmq.rabbitmqGuiPort }}
+    targetPort: {{ .Values.oobeyaRabbitmq.rabbitmqGuiPort }}
+

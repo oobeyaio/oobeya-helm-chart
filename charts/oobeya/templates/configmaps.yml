@@ -1,0 +1,185 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.oobeyaDashboard.configMapName }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.oobeyaDashboard.labels.app }}
+data:
+  PLATFORM_API_PORT: "8080"
+  PLATFORM_MANAGEMENT_PORT: "58080"
+  UAA_HOST: "oobeya-uaa"
+  UAA_CLIENT_ID: "oobeyaTrustedClient"
+  UAA_CLIENT_SECRET: "oobeyaClientSecret"
+  PLATFORM_COMPANY_NAME: "Oobeya"
+  PLATFORM_COMPANY_CLASSNAME: "oobeya"
+  PLATFORM_COMPANY_LOGO: "assets/images/testinium.svg"
+  EUREKA_ENABLED: "false"
+  RABBITMQ_HOST: "oobeya-rabbitmq"
+  ADDON_TESTRAIL_STATUS: "false"
+  ADDON_ZEPHYR_STATUS: "false"
+  ADDON_TESTINIUM_STATUS: "false"
+  ADDON_TESTINIUM_CLOUD_STATUS: "false"
+  ADDON_ELASTIC_APM_STATUS: "false"
+  ADDON_DYNATRACE_STATUS: "false"
+  ADDON_APPDYNAMICS_STATUS: "false"
+  ADDON_SENTRY_STATUS: "false"
+  CORS_ALLOWED_ORIGIN: "{{ .Values.oobeyaDashboard.corsAllowedOrigin }}"
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.oobeyaGateway.configMapName }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.oobeyaGateway.labels.app }}
+data:
+  OOBEYA_GATEWAY_PORT: "8099"
+  OOBEYA_GATEWAY_MANAGEMENT_PORT: "58099"
+  EUREKA_ENABLED: "false"
+  RABBITMQ_HOST: "oobeya-rabbitmq"
+  OOBEYA_GATEWAY_LOGGING_LEVEL: "TRACE"
+  GITWISER_API_PORT: "8077"
+  OOBEYA_GATEWAY_BASE_URL: "{{ .Values.oobeyaGateway.corsAllowedOrigin }}"
+  CORS_ALLOWED_ORIGIN: "{{ .Values.oobeyaGateway.gatewayBaseOrigin }}"
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.oobeyaMongo.configMapName }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.oobeyaMongo.labels.app }}
+data:
+  init-user.js: |
+    db.createUser({
+      user: "$MONGO_INITDB_ROOT_USERNAME",
+      pwd: "$MONGO_INITDB_ROOT_PASSWORD",
+      roles: [
+        { role: 'root', db: 'admin' },
+        { role: 'readWrite', db: 'addonsDB' },
+        { role: 'readWrite', db: 'gatewayDB' },
+        { role: 'readWrite', db: 'agilespaceDB' },
+        { role: 'readWrite', db: 'config' },
+        { role: 'readWrite', db: 'dashboardDB' },
+        { role: 'readWrite', db: 'devteamDB' },
+        { role: 'readWrite', db: 'gitwiserDB' },
+        { role: 'readWrite', db: 'uaaDB' }
+      ]
+    });
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.oobeyaAddons.configMapName }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.oobeyaAddons.labels.app }}
+data:
+  ADDONS_API_PORT: "8079"
+  ADDONS_MANAGEMENT_PORT: "58079"
+  EUREKA_ENABLED: "false"
+  RABBITMQ_HOST: "oobeya-rabbitmq"
+  SSL_ENABLED: {{ ternary "true" "false" .Values.customSSL.secretSSL.enabled | quote }}
+  SSL_CERT_FILE_NAMES: {{ join "," .Values.customSSL.secretSSL.certFileNames | quote }}
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.oobeyaAgilespace.configMapName }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.oobeyaAgilespace.labels.app }}
+data:
+  AGILESPACE_API_PORT: "8074"
+  AGILESPACE_MANAGEMENT_PORT: "58074"
+  EUREKA_ENABLED: "false"
+  RABBITMQ_HOST: "oobeya-rabbitmq"
+  SSL_ENABLED: {{ ternary "true" "false" .Values.customSSL.secretSSL.enabled | quote }}
+  SSL_CERT_FILE_NAMES: {{ join "," .Values.customSSL.secretSSL.certFileNames | quote }}
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.oobeyaDevteam.configMapName }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.oobeyaDevteam.labels.app }}
+data:
+  DEVTEAM_API_PORT: "8078"
+  DEVTEAM_MANAGEMENT_PORT: "58078"
+  EUREKA_ENABLED: "false"
+  RABBITMQ_HOST: "oobeya-rabbitmq"
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.oobeyaGitwiser.configMapName }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.oobeyaGitwiser.labels.app }}
+data:
+  GITWISER_API_PORT: "8077"
+  GITWISER_MANAGEMENT_PORT: "58077"
+  SSL_ENABLED: {{ ternary "true" "false" .Values.customSSL.secretSSL.enabled | quote }}
+  SSL_CERT_FILE_NAMES: {{ join "," .Values.customSSL.secretSSL.certFileNames | quote }}
+  EUREKA_ENABLED: "false"
+  RABBITMQ_HOST: "oobeya-rabbitmq"
+  SHOW_ABLE_HEATMAP: "true"
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.oobeyaRabbitmq.configMapName }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.oobeyaRabbitmq.labels.app }}
+data:
+  RABBITMQ_DEFAULT_USER: "admin"
+  RABBITMQ_DEFAULT_PASS: "123456"
+  RABBITMQ_HOST: "oobeya-rabbitmq"
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.oobeyaUaa.configMapName }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.oobeyaUaa.labels.app }}
+data:
+  UAA_API_PORT: "10000"
+  UAA_MANAGEMENT_PORT: "10001"
+  UAA_CLIENT_ID: "oobeyaTrustedClient"
+  UAA_CLIENT_SECRET: "oobeyaClientSecret"
+  SSL_ENABLED: {{ ternary "true" "false" .Values.customSSL.secretSSL.enabled | quote }}
+  SSL_CERT_FILE_NAMES: {{ join "," .Values.customSSL.secretSSL.certFileNames | quote }}
+  RABBITMQ_HOST: "oobeya-rabbitmq"
+  EUREKA_ENABLED: "false"
+  SHOW_ABLE_DASHBOARD: "false"
+  SHOW_ABLE_GAMIFICATION: "false"
+  SHOW_ABLE_TEAM_HEALTH: "true"
+  SHOW_ABLE_GITWISER: "true"
+  SHOW_ABLE_AGILESPACE: "true"
+  SHOW_ABLE_GAMIFICATION_V2: "true"
+  SHOW_ABLE_ALLOCATION: "true"
+  SHOW_ABLE_BUG_REPORT: "true"
+  SHOW_ABLE_HEATMAP: "true"
+  SHOW_ABLE_GIT_COPILOT: "true"
+  SHOW_ABLE_TEST_ANALYTICS: "true"
+

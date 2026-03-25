@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.oobeyaDashboard.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.oobeyaDashboard.labels.app }}
+spec:
+  replicas: {{ .Values.oobeya.replicaCount }}
+  strategy:
+    type: {{ .Values.strategy.type | default "RollingUpdate" }}
+  selector:
+    matchLabels:
+      app: {{ .Values.oobeyaDashboard.labels.app }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.oobeyaDashboard.labels.app }}
+    spec:
+      containers:
+        - name: {{ .Values.oobeyaDashboard.name }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          image: "{{ .Values.oobeyaDashboard.image.repository }}:{{ .Values.beVersion }}"
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.oobeyaDashboard.configMapName }}
+            - secretRef:
+                name: {{ .Values.oobeyaDashboard.secretName }}
+            - secretRef:
+                name: {{ .Values.oobeyaGitwiser.secretName }}
+            - secretRef:
+                name: {{ .Values.oobeyaDevteam.secretName }}
+          ports:
+            - containerPort: {{ .Values.oobeyaDashboard.dashboardPort }}
+            - containerPort: {{ .Values.oobeyaDashboard.dashboardApiPort }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.oobeyaDashboard.healthPaths }}
+              port: {{ .Values.oobeyaDashboard.dashboardApiPort }}
+            initialDelaySeconds: {{ .Values.oobeyaDashboard.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.oobeyaDashboard.readinessProbe.periodSeconds }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.oobeyaDashboard.healthPaths }}
+              port: {{ .Values.oobeyaDashboard.dashboardApiPort }}
+            initialDelaySeconds: {{ .Values.oobeyaDashboard.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.oobeyaDashboard.livenessProbe.periodSeconds }}
+          startupProbe:
+            httpGet:
+              path: {{ .Values.oobeyaDashboard.healthPaths }}
+              port: {{ .Values.oobeyaDashboard.dashboardApiPort }}
+            failureThreshold: {{ .Values.oobeyaDashboard.startupProbe.failureThreshold }}
+            periodSeconds: {{ .Values.oobeyaDashboard.startupProbe.periodSeconds }}
+          resources:
+            limits:
+              cpu: {{ .Values.oobeyaDashboard.resources.limits.cpu }}
+              memory: {{ .Values.oobeyaDashboard.resources.limits.memory }}
+            requests:
+              cpu: {{ .Values.oobeyaDashboard.resources.requests.cpu }}
+              memory: {{ .Values.oobeyaDashboard.resources.requests.memory }}
+      initContainers:
+        - name: {{ .Values.initContainers.name }}
+          image: {{ .Values.initContainers.image }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          command: ['sh', '-c', 'until nc -zv {{ .Values.initContainers.waitMongoService }} {{ .Values.initContainers.mongoPort }}; do echo waiting for mongodb; sleep 2; done;']
+      imagePullSecrets:
+        - name: oobeya-secret
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.oobeyaDashboard.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.oobeyaDashboard.labels.app }}
+spec:
+  ports:
+    - name: "access"
+      port: {{ .Values.oobeyaDashboard.dashboardPort }}
+      targetPort: {{ .Values.oobeyaDashboard.dashboardPort }}
+    - name: "api"
+      port: {{ .Values.oobeyaDashboard.dashboardApiPort }}
+      targetPort: {{ .Values.oobeyaDashboard.dashboardApiPort }}
+  selector:
+    app: {{ .Values.oobeyaDashboard.labels.app }}
+  type: ClusterIP
+
+

@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.oobeyaAgilespace.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.oobeyaAgilespace.labels.app }}
+spec:
+  replicas: {{ .Values.oobeya.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.oobeyaAgilespace.labels.app }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.oobeyaAgilespace.labels.app }}
+    spec:
+      containers:
+        - name: {{ .Values.oobeyaAgilespace.name }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          image: "{{ .Values.oobeyaAgilespace.image.repository }}:{{ .Values.beVersion }}"
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.oobeyaAgilespace.configMapName }}
+            - secretRef:
+                name: {{ .Values.oobeyaAgilespace.secretName }}
+          ports:
+            - containerPort: {{ .Values.oobeyaAgilespace.agilespacePort }}
+            - containerPort: {{ .Values.oobeyaAgilespace.agilespaceApiPort }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.oobeyaAgilespace.healthPaths }}
+              port: {{ .Values.oobeyaAgilespace.agilespaceApiPort }}
+            initialDelaySeconds: {{ .Values.oobeyaAgilespace.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.oobeyaAgilespace.readinessProbe.periodSeconds }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.oobeyaAgilespace.healthPaths }}
+              port: {{ .Values.oobeyaAgilespace.agilespaceApiPort }}
+            initialDelaySeconds: {{ .Values.oobeyaAgilespace.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.oobeyaAgilespace.livenessProbe.periodSeconds }}
+          startupProbe:
+            httpGet:
+              path: {{ .Values.oobeyaAgilespace.healthPaths }}
+              port: {{ .Values.oobeyaAgilespace.agilespaceApiPort }}
+            failureThreshold: {{ .Values.oobeyaAgilespace.startupProbe.failureThreshold }}
+            periodSeconds: {{ .Values.oobeyaAgilespace.startupProbe.periodSeconds }}
+          resources:
+            limits:
+              cpu: {{ .Values.oobeyaAgilespace.resources.limits.cpu }}
+              memory: {{ .Values.oobeyaAgilespace.resources.limits.memory }}
+            requests:
+              cpu: {{ .Values.oobeyaAgilespace.resources.requests.cpu }}
+              memory: {{ .Values.oobeyaAgilespace.resources.requests.memory }}
+          volumeMounts:
+            {{- if and .Values.customSSL.secretSSL.enabled }}
+            - name: "{{ .Values.oobeyaAgilespace.name }}-ssl"
+              mountPath: {{ .Values.customSSL.secretSSL.mountPath }}
+              readOnly: true
+            {{- end }}
+      initContainers:
+        - name: {{ .Values.initContainers.name }}
+          image: {{ .Values.initContainers.image }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          command: ['sh', '-c', "until wget {{ .Values.initContainers.waitUaaService }}:{{ .Values.initContainers.uaaApiPort }}{{ .Values.oobeyaUaa.healthPaths }}; do echo waiting for myservice; sleep 2; done"]
+      volumes:
+        {{- if and .Values.customSSL.secretSSL.enabled }}
+        - name: "{{ .Values.oobeyaAgilespace.name }}-ssl"
+          secret:
+            secretName: {{ .Values.customSSL.secretSSL.name }}
+        {{- end }}
+      imagePullSecrets:
+        - name: oobeya-secret
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.oobeyaAgilespace.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.oobeyaAgilespace.labels.app }}
+spec:
+  ports:
+    - name: "access"
+      port: {{ .Values.oobeyaAgilespace.agilespacePort }}
+      targetPort: {{ .Values.oobeyaAgilespace.agilespacePort }}
+    - name: "api"
+      port: {{ .Values.oobeyaAgilespace.agilespaceApiPort }}
+      targetPort: {{ .Values.oobeyaAgilespace.agilespaceApiPort }}
+  selector:
+    app: {{ .Values.oobeyaAgilespace.labels.app }}
+
+
+
