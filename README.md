@@ -6,7 +6,7 @@ Oobeya is a platform designed to help software engineering teams deliver high-qu
 ---
 
 **Warning**: Installation requires a valid ```StorageClass```.
-Before you begin, please ensure that your cluster has a configured ```StorageClass```, as ```Persistent Volumes``` are required.
+Before you begin, please ensure that your cluster has a configured ```StorageClass```, as ```Persistent Volumes Claim``` are required.
 
 We have two methods for installation and updates. 
 
@@ -71,7 +71,10 @@ We need to make some changes to values.yaml.
 ```
 
 ```
-corsAllowedOrigin: "http://your-IP-or-Domain"       # Your DNS or IP address
+oobeyaDashboard:
+   .
+   .
+   corsAllowedOrigin: "http://your-IP-or-Domain"        # Your DNS or IP address
 ```
 
 If you're using Nginx Ingress for access:
@@ -88,9 +91,10 @@ If you're using Traefik Ingress, similar definitions are included in the values.
 Finally, you can install it using the file.
 
 ```
-helm install oobeya oobeya/oobeya -f prod-values.yaml --version 1.0.1
+helm install oobeya oobeya/oobeya -f prod-values.yaml
 ```
 
+Once the READY status for all services is 1/1, network traffic will be routed through the ingress configurations.
 
 ## Install with commands
 
@@ -105,8 +109,7 @@ helm install oobeya oobeya/oobeya \
   --set storage.gitwiserStorage.storageClassName="local-path" \
   --set storage.gitwiserStorage.enabled="true" \
   --set storage.gitwiserStorage.size="30Gi" \
-  --set oobeyaDashboard.corsAllowedOrigin="http://Your-Domain" \
-  --version 1.0.1
+  --set oobeyaDashboard.corsAllowedOrigin="http://Your-Domain"
 ```
 
 Once the READY status for all services is 1/1, network traffic will be routed through the ingress configurations.
@@ -131,8 +134,7 @@ helm install oobeya oobeya/oobeya \
   --set storage.gitwiserStorage.size="30Gi" \
   --set oobeyaDashboard.corsAllowedOrigin="http://Your-Domain" \
   --set ingressNginx.enabled=true \
-  --set ingressNginx.host="your.domain.com" \
-  --version 1.0.1
+  --set ingressNginx.host="your.domain.com"
 ```
 
 ## Oobeya Ingress Description
@@ -194,25 +196,35 @@ If you're using Traefik, you should make the changes this way instead of using t
 
 ## Upgrade Oobeya Version
 
+Current versions:
+
+beVersion: 2.0.835
+feVersion: 2.0.548
+
 ### Upgrade version with values.yaml
 
 ```
 helm repo update
-helm upgrade oobeya oobeya/oobeya -f prod-values.yaml --version 1.0.x
+
+helm upgrade oobeya oobeya/oobeya \
+  -f prod-values.yaml \
+  --set beVersion=2.0.xxx \
+  --set feVersion=2.0.xxx
 ```
 
 ### Upgrade version with commands
 
 There are certain points to keep in mind when performing a version upgrade; specifically, everything included in the installation command must also be included in the upgrade command.
+Alternatively, we can use the ```--reuse-values``` option. 
 
 ```
 helm repo update oobeya 
 ```
 ```
 helm upgrade oobeya oobeya/oobeya \
-  --set ...
-  --set ...
-  --verison 1.0.2
+  --reuse-values \
+  --set beVersion=2.0.xxx \
+  --set feVersion=2.0.xxx
 ```
 
 

@@ -17,7 +17,16 @@ keywords:
   - dora-metrics
   - software-delivery
 
-icon: https://raw.githubusercontent.com/ugurbzkrt/helm/main/oobeya-logo.svg
+annotations:
+  artifacthub.io/install: |
+    helm repo add oobeya https://oobeyaio.github.io/oobeya-helm-chart/
+    
+    helm install oobeya oobeya/oobeya -f my-values.yaml
+
+sources:
+  - https://github.com/oobeyaio/oobeya-helm-chart
+  - https://docs.oobeya.io
+
+icon: https://raw.githubusercontent.com/oobeyaio/oobeya-helm-chart/main/oobeya-logo.svg
 
 home: https://oobeya.io
-docs: https://docs.oobeya.io
