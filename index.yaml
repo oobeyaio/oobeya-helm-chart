@@ -8,10 +8,10 @@ entries:
         helm install oobeya oobeya/oobeya -f my-values.yaml
     apiVersion: v2
     appVersion: Latest
-    created: "2026-03-27T12:20:34.881032218Z"
+    created: "2026-03-27T12:24:46.548969519Z"
     description: 'Oobeya: Engineering Intelligence Platform. Engineering metrics,
       DORA, and DevOps insights.'
-    digest: 3c8f5545ad7143c420c27c23532d2f67862a8c676056ebe2c8bdf6fe57e3e17a
+    digest: 0f1c861e84e156186fcd52ace5b36f51a242712e42d05ed689158b0ee0b553a7
     home: https://oobeya.io
     icon: https://raw.githubusercontent.com/oobeyaio/oobeya-helm-chart/main/oobeya-logo.svg
     keywords:
@@ -30,4 +30,4 @@ entries:
     urls:
     - https://oobeyaio.github.io/oobeya-helm-chart/oobeya-1.0.1.tgz
     version: 1.0.1
-generated: "2026-03-27T12:20:34.877926171Z"
+generated: "2026-03-27T12:24:46.545995344Z"

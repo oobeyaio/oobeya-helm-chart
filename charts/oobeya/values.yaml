@@ -11,7 +11,7 @@ imagePullPolicy: Always
 
 # Set Version
 uiVersion: 2.0.548
-beVersion: 2.0.835
+beVersion: 2.0.837
 
 storage:
     mongoStorage:
