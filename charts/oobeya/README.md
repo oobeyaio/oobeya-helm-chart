@@ -6,7 +6,7 @@ Oobeya is a platform designed to help software engineering teams deliver high-qu
 ---
 
 **Warning**: Installation requires a valid ```StorageClass```.
-Before you begin, please ensure that your cluster has a configured ```StorageClass```, as ```Persistent Volumes Claim``` are required.
+Before you begin, please ensure that your cluster has a configured ```StorageClass```, as ```Persistent Volume Claims``` are required.
 
 We have two methods for installation and updates. 
 
@@ -196,10 +196,7 @@ If you're using Traefik, you should make the changes this way instead of using t
 
 ## Upgrade Oobeya Version
 
-Current versions:
-
-beVersion: 2.0.835
-feVersion: 2.0.548
+You can successfully update by following the upgrade steps for the current versions.
 
 ### Upgrade version with values.yaml
 
@@ -208,13 +205,14 @@ helm repo update
 
 helm upgrade oobeya oobeya/oobeya \
   -f prod-values.yaml \
-  --set beVersion=2.0.xxx \
-  --set feVersion=2.0.xxx
+  --set beVersion=2.0.837 \
+  --set feVersion=2.0.548
 ```
 
 ### Upgrade version with commands
 
 There are certain points to keep in mind when performing a version upgrade; specifically, everything included in the installation command must also be included in the upgrade command.
+
 Alternatively, we can use the ```--reuse-values``` option. 
 
 ```
@@ -223,8 +221,8 @@ helm repo update oobeya
 ```
 helm upgrade oobeya oobeya/oobeya \
   --reuse-values \
-  --set beVersion=2.0.xxx \
-  --set feVersion=2.0.xxx
+  --set beVersion=2.0.837 \
+  --set feVersion=2.0.548
 ```
 
 
