@@ -8,7 +8,36 @@ entries:
         helm install oobeya oobeya/oobeya -f my-values.yaml
     apiVersion: v2
     appVersion: Latest
-    created: "2026-04-09T07:40:40.230648768Z"
+    created: "2026-04-09T08:52:06.163437334Z"
+    description: 'Oobeya: Engineering Intelligence Platform. Engineering metrics,
+      DORA, and DevOps insights.'
+    digest: 14366656c9c1f7d21a01428c4461647099fec215185d2ae65685105ff287a65d
+    home: https://oobeya.io
+    icon: https://raw.githubusercontent.com/oobeyaio/oobeya-helm-chart/main/oobeya-logo.svg
+    keywords:
+    - oobeya
+    - devops
+    - microservices
+    - engineering-intelligence
+    - dora-metrics
+    - software-delivery
+    kubeVersion: '>=1.27.0-0'
+    name: oobeya
+    sources:
+    - https://github.com/oobeyaio/oobeya-helm-chart
+    - https://docs.oobeya.io
+    type: application
+    urls:
+    - https://oobeyaio.github.io/oobeya-helm-chart/oobeya-1.0.3.tgz
+    version: 1.0.3
+  - annotations:
+      artifacthub.io/install: |
+        helm repo add oobeya https://oobeyaio.github.io/oobeya-helm-chart/
+
+        helm install oobeya oobeya/oobeya -f my-values.yaml
+    apiVersion: v2
+    appVersion: Latest
+    created: "2026-04-09T08:52:06.161221516Z"
     description: 'Oobeya: Engineering Intelligence Platform. Engineering metrics,
       DORA, and DevOps insights.'
     digest: e3de958baa9e33f63c1d27ef0915f1f0883a4b53761b4beb13af7c30754e1412
@@ -37,7 +66,7 @@ entries:
         helm install oobeya oobeya/oobeya -f my-values.yaml
     apiVersion: v2
     appVersion: Latest
-    created: "2026-04-09T07:40:40.22842532Z"
+    created: "2026-04-09T08:52:06.158181218Z"
     description: 'Oobeya: Engineering Intelligence Platform. Engineering metrics,
       DORA, and DevOps insights.'
     digest: 0f1c861e84e156186fcd52ace5b36f51a242712e42d05ed689158b0ee0b553a7
@@ -59,4 +88,4 @@ entries:
     urls:
     - https://oobeyaio.github.io/oobeya-helm-chart/oobeya-1.0.1.tgz
     version: 1.0.1
-generated: "2026-04-09T07:40:40.222788767Z"
+generated: "2026-04-09T08:52:06.152171185Z"
