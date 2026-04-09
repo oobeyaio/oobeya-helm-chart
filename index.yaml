@@ -8,7 +8,36 @@ entries:
         helm install oobeya oobeya/oobeya -f my-values.yaml
     apiVersion: v2
     appVersion: Latest
-    created: "2026-03-27T12:24:46.548969519Z"
+    created: "2026-04-09T06:59:14.90731712Z"
+    description: 'Oobeya: Engineering Intelligence Platform. Engineering metrics,
+      DORA, and DevOps insights.'
+    digest: 8a3bf3f572911474f9a8c2889c031ea83be04c841443b302cb895f8b38fa8096
+    home: https://oobeya.io
+    icon: https://raw.githubusercontent.com/oobeyaio/oobeya-helm-chart/main/oobeya-logo.svg
+    keywords:
+    - oobeya
+    - devops
+    - microservices
+    - engineering-intelligence
+    - dora-metrics
+    - software-delivery
+    kubeVersion: '>=1.27.0-0'
+    name: oobeya
+    sources:
+    - https://github.com/oobeyaio/oobeya-helm-chart
+    - https://docs.oobeya.io
+    type: application
+    urls:
+    - https://oobeyaio.github.io/oobeya-helm-chart/oobeya-1.0.2.tgz
+    version: 1.0.2
+  - annotations:
+      artifacthub.io/install: |
+        helm repo add oobeya https://oobeyaio.github.io/oobeya-helm-chart/
+
+        helm install oobeya oobeya/oobeya -f my-values.yaml
+    apiVersion: v2
+    appVersion: Latest
+    created: "2026-04-09T06:59:14.905171481Z"
     description: 'Oobeya: Engineering Intelligence Platform. Engineering metrics,
       DORA, and DevOps insights.'
     digest: 0f1c861e84e156186fcd52ace5b36f51a242712e42d05ed689158b0ee0b553a7
@@ -30,4 +59,4 @@ entries:
     urls:
     - https://oobeyaio.github.io/oobeya-helm-chart/oobeya-1.0.1.tgz
     version: 1.0.1
-generated: "2026-03-27T12:24:46.545995344Z"
+generated: "2026-04-09T06:59:14.902796591Z"
