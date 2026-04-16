@@ -10,8 +10,8 @@ strategy:
 imagePullPolicy: Always
 
 # Set Version
-uiVersion: 2.0.552
-beVersion: 2.0.846
+uiVersion: 2.0.559
+beVersion: 2.0.854
 
 storage:
     mongoStorage:
