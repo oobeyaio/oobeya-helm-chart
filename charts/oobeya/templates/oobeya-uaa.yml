@@ -26,6 +26,8 @@ spec:
                 name: {{ .Values.oobeyaUaa.configMapName }}
             - secretRef:
                 name: {{ .Values.oobeyaUaa.secretName }}
+            - secretRef:
+                name: {{ .Values.oobeyaRabbitmq.secretName }}
           ports:
             - containerPort: {{ .Values.oobeyaUaa.uaaPort }}
             - containerPort: {{ .Values.oobeyaUaa.uaaApiPort }}

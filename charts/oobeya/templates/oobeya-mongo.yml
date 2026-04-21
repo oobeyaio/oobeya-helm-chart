@@ -1,3 +1,4 @@
+{{- if not .Values.oobeyaExternalMongo.isExternal }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -95,6 +96,5 @@ spec:
       targetPort: {{ .Values.oobeyaMongo.mongoPort }}
   selector:
     app: {{ .Values.oobeyaMongo.labels.app }}
-
-
+{{- end }}
 

@@ -30,6 +30,8 @@ spec:
                 name: {{ .Values.oobeyaGitwiser.secretName }}
             - secretRef:
                 name: {{ .Values.oobeyaDevteam.secretName }}
+            - secretRef:
+                name: {{ .Values.oobeyaRabbitmq.secretName }}
           ports:
             - containerPort: {{ .Values.oobeyaDashboard.dashboardPort }}
             - containerPort: {{ .Values.oobeyaDashboard.dashboardApiPort }}
@@ -62,7 +64,7 @@ spec:
         - name: {{ .Values.initContainers.name }}
           image: {{ .Values.initContainers.image }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
-          command: ['sh', '-c', 'until nc -zv {{ .Values.initContainers.waitMongoService }} {{ .Values.initContainers.mongoPort }}; do echo waiting for mongodb; sleep 2; done;']
+          command: ['sh', '-c', 'until nc -zv {{ .Values.oobeyaExternalMongo.host }} {{ .Values.oobeyaExternalMongo.port }}; do echo waiting for mongodb; sleep 2; done;']
       imagePullSecrets:
         - name: oobeya-secret
 

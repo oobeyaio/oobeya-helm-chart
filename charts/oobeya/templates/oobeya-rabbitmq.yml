@@ -1,3 +1,4 @@
+{{- if not .Values.oobeyaExternalRabbitmq.isExternal -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -20,8 +21,8 @@ spec:
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           image: {{ .Values.oobeyaRabbitmq.image.repository }}
           envFrom:
-            - configMapRef:
-                name: {{ .Values.oobeyaRabbitmq.configMapName }}
+            - secretRef:
+                name: {{ .Values.oobeyaRabbitmq.secretName }}
           ports:
             - containerPort: {{ .Values.oobeyaRabbitmq.rabbitmqPort }}
             - containerPort: {{ .Values.oobeyaRabbitmq.rabbitmqGuiPort }}
@@ -40,10 +41,7 @@ spec:
           emptyDir: {}
       imagePullSecrets:
         - name: oobeya-secret
-
-
 ---
-
 apiVersion: v1
 kind: Service
 metadata:
@@ -61,4 +59,4 @@ spec:
   - name: "gui"
     port: {{ .Values.oobeyaRabbitmq.rabbitmqGuiPort }}
     targetPort: {{ .Values.oobeyaRabbitmq.rabbitmqGuiPort }}
-
+{{- end }}

@@ -1,3 +1,4 @@
+
 oobeya:
   name: oobeya
   replicaCount: 1
@@ -10,8 +11,8 @@ strategy:
 imagePullPolicy: Always
 
 # Set Version
-uiVersion: 2.0.559
-beVersion: 2.0.854
+uiVersion: 2.0.564
+beVersion: 2.0.859
 
 storage:
     mongoStorage:
@@ -19,7 +20,7 @@ storage:
       storageClassName: local-path                      # StorageClass Name
       size: 100Gi                                       # Storage Size
     gitwiserStorage:
-      enabled: true
+      enabled: false
       pvcName: oobeya-gitwiser-pvc
       storageClassName: local-path                      # StorageClass Name
       size: 20Gi                                        # Storage Size
@@ -296,17 +297,51 @@ oobeyaRabbitmq:
       requests:
         cpu: 0.25
         memory: 256Mi
-    configMapName: rabbitmq-configmap
+    secretName: rabbitmq-secret
+
+# External Mongo Configs
+oobeyaExternalMongo:
+  isExternal: false
+  host: ""
+  port: ""
+  user: ""
+  pass: ""
+  authSource: "admin"
+  databases:
+    dashboard: "dashboardDB"
+    devteam: "devteamDB"
+    gitwiser: "gitwiserDB"
+    uaa: "uaaDB"
+    agilespace: "agilespaceDB"
+    addons: "addonsDB"
+    gateway: "gatewayDB"
+
+# External Rabbitmq Configs
+oobeyaExternalRabbitmq:
+  isExternal: false
+  secretName: "rabbitmq-secret"
+  labels:
+    app: "oobeya-rabbitmq"
+  external:
+    host: ""
+    port: ""
+    user: ""
+    pass: ""
+    vhost: ""
+    ssl: "false"
+    sslVerify: "false"
+  internal:
+    user: "admin"
+    pass: "123456"
+    host: "oobeya-rabbitmq"
 
 initContainers:
-    name: wait-oobeya-pods
-    image: oobeya.azurecr.io/oobeya-busybox:latest
-    waitMongoService: "oobeya-mongo.oobeya.svc.cluster.local"
-    waitDashboardService: "oobeya-dashboard"
-    waitUaaService: "oobeya-uaa"
-    mongoPort: 27017
-    dashboardApiPort: 58080
-    uaaApiPort: 10001
+  name: wait-oobeya-pods
+  image: oobeya.azurecr.io/oobeya-busybox:latest
+  waitDashboardService: "oobeya-dashboard"
+  waitUaaService: "oobeya-uaa"
+  dashboardApiPort: 58080
+  uaaApiPort: 10001
 
 customSSL:
     secretSSL:
@@ -370,5 +405,3 @@ oobeyaGatewayIngress:
     path: /apis
     ingressClass: nginx
     path2: /v3/api-docs
-
-

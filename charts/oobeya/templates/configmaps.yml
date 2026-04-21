@@ -47,6 +47,7 @@ data:
 
 ---
 
+{{- if not .Values.oobeyaExternalMongo.isExternal }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -71,6 +72,7 @@ data:
         { role: 'readWrite', db: 'uaaDB' }
       ]
     });
+{{- end }}
 
 ---
 
@@ -138,20 +140,6 @@ data:
   EUREKA_ENABLED: "false"
   RABBITMQ_HOST: "oobeya-rabbitmq"
   SHOW_ABLE_HEATMAP: "true"
-
----
-
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ .Values.oobeyaRabbitmq.configMapName }}
-  namespace: {{ .Values.namespace }}
-  labels:
-    app: {{ .Values.oobeyaRabbitmq.labels.app }}
-data:
-  RABBITMQ_DEFAULT_USER: "admin"
-  RABBITMQ_DEFAULT_PASS: "123456"
-  RABBITMQ_HOST: "oobeya-rabbitmq"
 
 ---
 

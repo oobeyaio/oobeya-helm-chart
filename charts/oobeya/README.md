@@ -205,8 +205,8 @@ helm repo update
 
 helm upgrade oobeya oobeya/oobeya \
   -f prod-values.yaml \
-  --set beVersion=2.0.854 \
-  --set feVersion=2.0.559
+  --set beVersion=2.0.859 \
+  --set feVersion=2.0.564
 ```
 
 ### Upgrade version with commands
@@ -221,8 +221,8 @@ helm repo update oobeya
 ```
 helm upgrade oobeya oobeya/oobeya \
   --reuse-values \
-  --set beVersion=2.0.854 \
-  --set feVersion=2.0.559
+  --set beVersion=2.0.859 \
+  --set feVersion=2.0.564
 ```
 
 

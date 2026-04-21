@@ -24,6 +24,8 @@ spec:
                 name: {{ .Values.oobeyaGateway.configMapName }}
             - secretRef:
                 name: {{ .Values.oobeyaGateway.secretName }}
+            - secretRef:
+                name: {{ .Values.oobeyaRabbitmq.secretName }}
           ports:
             - containerPort: {{ .Values.oobeyaGateway.gatewayPort }}
             - containerPort: {{ .Values.oobeyaGateway.gatewayApiPort }}

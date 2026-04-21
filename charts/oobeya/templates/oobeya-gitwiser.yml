@@ -47,6 +47,8 @@ spec:
                 name: {{ .Values.oobeyaDashboard.secretName }}
             - secretRef:
                 name: {{ .Values.oobeyaDevteam.secretName }}
+            - secretRef:
+                name: {{ .Values.oobeyaRabbitmq.secretName }}
           ports:
             - containerPort: {{ .Values.oobeyaGitwiser.gitwiserPort }}
             - containerPort: {{ .Values.oobeyaGitwiser.gitwiserApiPort }}

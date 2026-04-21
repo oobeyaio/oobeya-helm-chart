@@ -24,6 +24,8 @@ spec:
                 name: {{ .Values.oobeyaAgilespace.configMapName }}
             - secretRef:
                 name: {{ .Values.oobeyaAgilespace.secretName }}
+            - secretRef:
+                name: {{ .Values.oobeyaRabbitmq.secretName }}
           ports:
             - containerPort: {{ .Values.oobeyaAgilespace.agilespacePort }}
             - containerPort: {{ .Values.oobeyaAgilespace.agilespaceApiPort }}
