@@ -11,8 +11,8 @@ strategy:
 imagePullPolicy: Always
 
 # Set Version
-uiVersion: 2.0.564
-beVersion: 2.0.860
+uiVersion: 2.0.590
+beVersion: 2.0.902
 
 storage:
     mongoStorage:
@@ -352,6 +352,27 @@ customSSL:
           - ""
           - ""
           - ""
+
+# Vault Examples
+vault:
+  enabled: false
+  server: "http://vault.vault.svc.cluster.local:8200"
+  path: "secrets"
+  version: "v2"
+  role: "oobeya-role"
+  serviceAccount: "oobeya-sa"
+  refreshInterval: "1h"
+  secretStore: "vault-cluster-store"
+  paths:
+    mongo:      "secrets/oobeya/mongo"
+    gateway:    "secrets/oobeya/gateway"
+    addons:     "secrets/oobeya/addons"
+    agilespace: "secrets/oobeya/agilespace"
+    dashboard:  "secrets/oobeya/dashboard"
+    devteam:    "secrets/oobeya/devteam"
+    gitwiser:   "secrets/oobeya/gitwiser"
+    uaa:        "secrets/oobeya/uaa"
+    rabbitmq:   "secrets/oobeya/rabbitmq"
 
 ingressNginx:
   enabled: false
