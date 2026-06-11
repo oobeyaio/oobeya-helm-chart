@@ -21,6 +21,9 @@ spec:
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           ports:
             - containerPort: {{ .Values.oobeyaUi.uiPort }}
+          env:
+            - name: NGINX_PORT
+              value: "{{ .Values.oobeyaUi.uiPort }}"
           readinessProbe:
             httpGet:
               path: {{ .Values.oobeyaUi.healthPaths }}
@@ -55,7 +58,7 @@ metadata:
 spec:
   ports:
     - name: "access"
-      port: {{ .Values.oobeyaUi.uiApiPort }}
+      port: {{ .Values.oobeyaUi.uiPort }}
       targetPort: {{ .Values.oobeyaUi.uiPort }}
   selector:
     app: {{ .Values.oobeyaUi.labels.app }}

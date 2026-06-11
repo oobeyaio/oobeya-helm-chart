@@ -11,8 +11,8 @@ strategy:
 imagePullPolicy: Always
 
 # Set Version
-uiVersion: 2.0.590
-beVersion: 2.0.902
+uiVersion: 2.0.591
+beVersion: 2.0.905
 
 storage:
     mongoStorage:
@@ -117,8 +117,8 @@ oobeyaUi:
     image:
       repository: oobeya.azurecr.io/oobeya-ui
       tag: "{{ .Values.uiVersion }}"
-    uiPort: 80
-    uiApiPort: 4200
+    uiPort: 8080
+    uiApiPort: 8080
     healthPaths: "/healthz"
     labels:
       app: oobeya-ui
@@ -391,8 +391,8 @@ oobeyaUiIngress:
   image:
     repository: oobeya.azurecr.io/oobeya-ui
     tag: "{{ .Values.uiVersion }}"
-  uiPort: 80
-  uiApiPort: 4200
+  uiPort: 8080
+  uiApiPort: 8080
   labels:
     app: oobeya-ui
   ingress:
