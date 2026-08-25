@@ -11,8 +11,8 @@ strategy:
 imagePullPolicy: Always
 
 # Set Version
-uiVersion: 2.0.591
-beVersion: 2.0.905
+uiVersion: latest
+beVersion: latest
 
 storage:
     mongoStorage:
@@ -337,7 +337,7 @@ oobeyaExternalRabbitmq:
 
 initContainers:
   name: wait-oobeya-pods
-  image: oobeya.azurecr.io/oobeya-busybox:latest
+  image: oobeya.azurecr.io/oobeya-busybox:1.37
   waitDashboardService: "oobeya-dashboard"
   waitUaaService: "oobeya-uaa"
   dashboardApiPort: 58080

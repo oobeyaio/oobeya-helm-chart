@@ -64,7 +64,7 @@ spec:
         - name: {{ .Values.initContainers.name }}
           image: {{ .Values.initContainers.image }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
-          command: ['sh', '-c', "until wget {{ .Values.initContainers.waitUaaService }}:{{ .Values.initContainers.uaaApiPort }}{{ .Values.oobeyaUaa.healthPaths }}; do echo waiting for myservice; sleep 2; done"]
+          command: ['sh', '-c', "until wget --spider -q {{ .Values.initContainers.waitUaaService }}:{{ .Values.initContainers.uaaApiPort }}{{ .Values.oobeyaUaa.healthPaths }}; do echo waiting for myservice; sleep 2; done"]
       volumes:
         {{- if and .Values.customSSL.secretSSL.enabled }}
         - name: "{{ .Values.oobeyaAgilespace.name }}-ssl"
