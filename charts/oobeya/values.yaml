@@ -302,11 +302,9 @@ oobeyaRabbitmq:
 # External Mongo Configs
 oobeyaExternalMongo:
   isExternal: false
-  host: "oobeya-mongo.oobeya.svc.cluster.local"           # Set your MongoDB domain or IP
-  port: "27017"                                           # Set MongoDB Port
-  user: ""
-  pass: ""
-  authSource: "admin"
+  mongoUri: ""                                                 # Set your MongoDB URI                             
+  healthCheckHost: "oobeya-mongo.oobeya.svc.cluster.local"     # Host used only by the init-container TCP wait check. For an external replica set, set this to one reachable node.
+  healthCheckPort: "27017"                                     # Port used only by the init-container TCP wait check.
   databases:
     dashboard: "dashboardDB"
     devteam: "devteamDB"
@@ -384,6 +382,13 @@ ingressNginx:
 ingressTraefik:
   enabled: false
   host: "oobeya-traefik.local"
+
+ingressOpenshift:
+  enabled: false
+  host: "oobeya.local"
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
   entryPoints: "web"
     
 oobeyaUiIngress:

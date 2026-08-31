@@ -20,6 +20,7 @@ We prefer to use values.yaml for installation and updates. We want changes to be
 * [Quick Start](#quick-start)
 * [Install with Values.yaml](#install-with-Values.yaml)
 * [Install with commands](#install-with-commands)
+* [External MongoDB Configuration](#external-mongodb-configuration)
 * [Oobeya Ingress Description](#oobeya-ingress-description)
 * [Upgrade Oobeya Version](#upgrade-oobeya-version)
 * [Documents](#documents)
@@ -86,7 +87,7 @@ ingressNginx:
   host: "oobeya.local"
 ```
 
-If you're using Traefik Ingress, similar definitions are included in the values.yaml file.
+If you're using Traefik Ingress or running on OpenShift, similar definitions are included in the values.yaml file (`ingressTraefik`, `ingressOpenshift`).
 
 Finally, you can install it using the file.
 
@@ -113,6 +114,62 @@ helm install oobeya oobeya/oobeya \
 ```
 
 Once the READY status for all services is 1/1, network traffic will be routed through the ingress configurations.
+
+## External MongoDB Configuration
+
+By default, Oobeya deploys and manages its own internal MongoDB instance. If you want to use your own external MongoDB — a single instance or a replica set — set `oobeyaExternalMongo.isExternal: true` and provide your connection URI.
+
+```yaml
+oobeyaExternalMongo:
+  isExternal: true
+  mongoUri: "<your-mongodb-connection-uri>"
+  healthCheckHost: "<a-reachable-mongo-host>"
+  healthCheckPort: "27017"
+```
+
+### How `mongoUri` works
+
+Paste your MongoDB connection URI exactly as it was given to you — host(s), credentials, database name, and full query string all included. Oobeya automatically detects and replaces only the database name in the URI for each of its services; everything else (hosts, credentials, `authSource`, `replicaSet`, `tls`, etc.) is preserved as-is. You do not need to split the URI into separate fields, and you do not need to remove or edit the database name in it — the chart handles that.
+
+Each Oobeya service uses its own MongoDB database, defined under `oobeyaExternalMongo.databases`:
+
+```yaml
+oobeyaExternalMongo:
+  databases:
+    dashboard: "dashboardDB"
+    devteam: "devteamDB"
+    gitwiser: "gitwiserDB"
+    uaa: "uaaDB"
+    agilespace: "agilespaceDB"
+    addons: "addonsDB"
+    gateway: "gatewayDB"
+```
+
+You may rename these to match database names your DBA has already provisioned — the chart will still build a correct, valid URI for every service.
+
+### Single-instance MongoDB example
+
+```yaml
+oobeyaExternalMongo:
+  isExternal: true
+  mongoUri: "mongodb://oobeya_user:StrongPassword@mongo.example.com:27017/anyDB?authSource=admin"
+  healthCheckHost: "mongo.example.com"
+  healthCheckPort: "27017"
+```
+
+### Shared / Replica Set MongoDB example
+
+```yaml
+oobeyaExternalMongo:
+  isExternal: true
+  mongoUri: "mongodb://oobeya_user:StrongPassword@mongo01.example.com:27017,mongo02.example.com:27017,mongo03.example.com:27017/anyDB?replicaSet=rs0&authSource=admin&tls=true&readPreference=primaryPreferred"
+  healthCheckHost: "mongo01.example.com"
+  healthCheckPort: "27017"
+```
+
+### About `healthCheckHost` / `healthCheckPort`
+
+These two fields are used only by an init-container that waits for MongoDB to become reachable before the Dashboard service starts. They are separate from `mongoUri` because a replica set URI can list several hosts, while this TCP check needs exactly one. Point them to any single node you expect to be reachable — for a replica set, any one of its members is fine.
 
 ## Oobeya Ingress Setup
 
@@ -192,6 +249,26 @@ If you're using Traefik, you should make the changes this way instead of using t
 ```
   --set ingressTraefik.enabled=true \
   --set ingressTraefik.host="oobeya-traefik.yourdomain.com" \
+```
+
+### OpenShift Route
+
+If you're running on OpenShift, enable `ingressOpenshift` instead of `ingressNginx`/`ingressTraefik`. It creates a `route.openshift.io/v1` `Route` for each path (`/`, `/api`, `/apis`, `/v3/api-docs`) pointing at the same services and ports used by the other ingress options.
+
+```yaml
+ingressOpenshift:
+  enabled: true
+  host: "oobeya.apps.yourcluster.example.com"
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+```
+
+Or with `--set`:
+
+```
+  --set ingressOpenshift.enabled=true \
+  --set ingressOpenshift.host="oobeya.apps.yourcluster.example.com"
 ```
 
 ## Upgrade Oobeya Version

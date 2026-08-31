@@ -1,0 +1,69 @@
+{{- if .Values.ingressOpenshift.enabled -}}
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{ .Values.oobeyaUiIngress.name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  host: {{ .Values.ingressOpenshift.host | quote }}
+  path: {{ .Values.oobeyaUiIngress.ingress.path }}
+  to:
+    kind: Service
+    name: {{ .Values.oobeyaUiIngress.name }}
+  port:
+    targetPort: {{ .Values.oobeyaUiIngress.uiPort }}
+  tls:
+    termination: {{ .Values.ingressOpenshift.tls.termination }}
+    insecureEdgeTerminationPolicy: {{ .Values.ingressOpenshift.tls.insecureEdgeTerminationPolicy }}
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{ .Values.oobeyaDashboardIngress.name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  host: {{ .Values.ingressOpenshift.host | quote }}
+  path: {{ .Values.oobeyaDashboardIngress.ingress.path }}
+  to:
+    kind: Service
+    name: {{ .Values.oobeyaDashboardIngress.name }}
+  port:
+    targetPort: {{ .Values.oobeyaDashboardIngress.dashboardPort }}
+  tls:
+    termination: {{ .Values.ingressOpenshift.tls.termination }}
+    insecureEdgeTerminationPolicy: {{ .Values.ingressOpenshift.tls.insecureEdgeTerminationPolicy }}
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{ .Values.oobeyaGatewayIngress.name }}-apis
+  namespace: {{ .Values.namespace }}
+spec:
+  host: {{ .Values.ingressOpenshift.host | quote }}
+  path: {{ .Values.oobeyaGatewayIngress.ingress.path }}
+  to:
+    kind: Service
+    name: {{ .Values.oobeyaGatewayIngress.name }}
+  port:
+    targetPort: {{ .Values.oobeyaGatewayIngress.gatewayPort }}
+  tls:
+    termination: {{ .Values.ingressOpenshift.tls.termination }}
+    insecureEdgeTerminationPolicy: {{ .Values.ingressOpenshift.tls.insecureEdgeTerminationPolicy }}
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{ .Values.oobeyaGatewayIngress.name }}-api-docs
+  namespace: {{ .Values.namespace }}
+spec:
+  host: {{ .Values.ingressOpenshift.host | quote }}
+  path: {{ .Values.oobeyaGatewayIngress.ingress.path2 }}
+  to:
+    kind: Service
+    name: {{ .Values.oobeyaGatewayIngress.name }}
+  port:
+    targetPort: {{ .Values.oobeyaGatewayIngress.gatewayPort }}
+  tls:
+    termination: {{ .Values.ingressOpenshift.tls.termination }}
+    insecureEdgeTerminationPolicy: {{ .Values.ingressOpenshift.tls.insecureEdgeTerminationPolicy }}
+{{- end }}
