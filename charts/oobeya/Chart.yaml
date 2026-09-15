@@ -3,7 +3,7 @@ name: oobeya
 description: "Oobeya: Engineering Intelligence Platform. Engineering metrics, DORA, and DevOps insights."
 type: application
 
-version: 1.0.10
+version: 1.0.11
 
 appVersion: "Latest"
 

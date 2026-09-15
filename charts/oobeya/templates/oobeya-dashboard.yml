@@ -60,11 +60,23 @@ spec:
             requests:
               cpu: {{ .Values.oobeyaDashboard.resources.requests.cpu }}
               memory: {{ .Values.oobeyaDashboard.resources.requests.memory }}
+          volumeMounts:
+            {{- if and .Values.customSSL.secretSSL.enabled }}
+            - name: "{{ .Values.oobeyaDashboard.name }}-ssl"
+              mountPath: {{ .Values.customSSL.secretSSL.mountPath }}
+              readOnly: true
+            {{- end }}
       initContainers:
         - name: {{ .Values.initContainers.name }}
           image: {{ .Values.initContainers.image }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           command: ['sh', '-c', 'until nc -zv {{ .Values.oobeyaExternalMongo.healthCheckHost }} {{ .Values.oobeyaExternalMongo.healthCheckPort }}; do echo waiting for mongodb; sleep 2; done;']
+      volumes:
+        {{- if and .Values.customSSL.secretSSL.enabled }}
+        - name: "{{ .Values.oobeyaDashboard.name }}-ssl"
+          secret:
+            secretName: {{ .Values.customSSL.secretSSL.name }}
+        {{- end }}
       imagePullSecrets:
         - name: oobeya-secret
 

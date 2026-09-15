@@ -25,6 +25,8 @@ data:
   ADDON_APPDYNAMICS_STATUS: "false"
   ADDON_SENTRY_STATUS: "false"
   CORS_ALLOWED_ORIGIN: "{{ .Values.oobeyaDashboard.corsAllowedOrigin }}"
+  SSL_ENABLED: {{ ternary "true" "false" .Values.customSSL.secretSSL.enabled | quote }}
+  SSL_CERT_FILE_NAMES: {{ join "," .Values.customSSL.secretSSL.certFileNames | quote }}
 
 ---
 
@@ -44,6 +46,8 @@ data:
   GITWISER_API_PORT: "8077"
   OOBEYA_GATEWAY_BASE_URL: "{{ .Values.oobeyaGateway.corsAllowedOrigin }}"
   CORS_ALLOWED_ORIGIN: "{{ .Values.oobeyaGateway.gatewayBaseOrigin }}"
+  SSL_ENABLED: {{ ternary "true" "false" .Values.customSSL.secretSSL.enabled | quote }}
+  SSL_CERT_FILE_NAMES: {{ join "," .Values.customSSL.secretSSL.certFileNames | quote }}
 
 ---
 
@@ -122,6 +126,8 @@ data:
   DEVTEAM_MANAGEMENT_PORT: "58078"
   EUREKA_ENABLED: "false"
   RABBITMQ_HOST: "oobeya-rabbitmq"
+  SSL_ENABLED: {{ ternary "true" "false" .Values.customSSL.secretSSL.enabled | quote }}
+  SSL_CERT_FILE_NAMES: {{ join "," .Values.customSSL.secretSSL.certFileNames | quote }}
 
 ---
 

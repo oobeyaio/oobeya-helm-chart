@@ -36,6 +36,12 @@ spec:
               port: {{ .Values.oobeyaUi.uiPort }}
             initialDelaySeconds: {{ .Values.oobeyaUi.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.oobeyaUi.livenessProbe.periodSeconds }}
+          startupProbe:
+            httpGet:
+              path: {{ .Values.oobeyaUi.healthPaths }}
+              port: {{ .Values.oobeyaUi.uiPort }}
+            failureThreshold: {{ .Values.oobeyaUi.startupProbe.failureThreshold }}
+            periodSeconds: {{ .Values.oobeyaUi.startupProbe.periodSeconds }}
           resources:
             limits:
               cpu: {{ .Values.oobeyaUi.resources.limits.cpu }}
