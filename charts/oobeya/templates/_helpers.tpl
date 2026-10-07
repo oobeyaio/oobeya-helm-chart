@@ -60,3 +60,60 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+Resolve the MongoDB connection URI of a single Oobeya service.
+
+Usage: include "oobeya.mongo.uri" (dict "mongo" .Values.oobeyaExternalMongo "service" "dashboard")
+
+The base URI is oobeyaExternalMongo.uris.<service> when it is set, otherwise the
+shared oobeyaExternalMongo.mongoUri. When oobeyaExternalMongo.credentials.<service>
+carries a username, it replaces any user info the base URI already had, and its
+optional authSource replaces the authSource of the query string. The database path
+is always taken from oobeyaExternalMongo.databases.<service>; hosts and every other
+query parameter are preserved as given.
+*/}}
+{{- define "oobeya.mongo.uri" -}}
+{{- $mongo := .mongo -}}
+{{- $service := .service -}}
+{{- $db := index $mongo.databases $service -}}
+{{- $base := default $mongo.mongoUri (get (default (dict) $mongo.uris) $service) -}}
+{{- $scheme := regexFind "^mongodb(\\+srv)?://" $base -}}
+{{- if not $scheme -}}
+{{- fail (printf "oobeyaExternalMongo: the URI for %q must start with mongodb:// or mongodb+srv:// (got %q)" $service $base) -}}
+{{- end -}}
+{{- $rest := trimPrefix $scheme $base -}}
+{{- $userinfo := regexFind "^[^/?]*@" $rest -}}
+{{- $remainder := trimPrefix $userinfo $rest -}}
+{{- $path := $remainder -}}
+{{- $query := "" -}}
+{{- if contains "?" $remainder -}}
+{{- $split := splitn "?" 2 $remainder -}}
+{{- $path = $split._0 -}}
+{{- $query = $split._1 -}}
+{{- end -}}
+{{- $hosts := $path -}}
+{{- if contains "/" $path -}}
+{{- $hosts = (splitn "/" 2 $path)._0 -}}
+{{- end -}}
+{{- $creds := default (dict) (get (default (dict) $mongo.credentials) $service) -}}
+{{- $username := default "" (get $creds "username") -}}
+{{- if $username -}}
+{{- $userinfo = printf "%s:%s@" $username (default "" (get $creds "password")) -}}
+{{- end -}}
+{{- $authSource := default "" (get $creds "authSource") -}}
+{{- if $authSource -}}
+{{- $params := list -}}
+{{- range $param := (splitList "&" $query) -}}
+{{- if and $param (not (hasPrefix "authSource=" $param)) -}}
+{{- $params = append $params $param -}}
+{{- end -}}
+{{- end -}}
+{{- $query = join "&" (append $params (printf "authSource=%s" $authSource)) -}}
+{{- end -}}
+{{- if $query -}}
+{{- printf "%s%s%s/%s?%s" $scheme $userinfo $hosts $db $query -}}
+{{- else -}}
+{{- printf "%s%s%s/%s" $scheme $userinfo $hosts $db -}}
+{{- end -}}
+{{- end }}

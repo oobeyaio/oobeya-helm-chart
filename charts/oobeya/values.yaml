@@ -316,6 +316,25 @@ oobeyaExternalMongo:
     agilespace: "agilespaceDB"
     addons: "addonsDB"
     gateway: "gatewayDB"
+  # Optional. Leave empty to authenticate every database with the credentials carried by mongoUri.
+  # Fill in a service to give that database its own MongoDB user; hosts and the rest of the query
+  # string still come from mongoUri. Set authSource when the user lives in its own database instead
+  # of admin. Percent-encode any reserved character (@ : / ? # & %) in the password.
+  credentials: {}
+  # credentials:
+  #   dashboard:
+  #     username: "dashboard_user"
+  #     password: "StrongPassword"
+  #     authSource: "dashboardDB"
+  #   devteam:
+  #     username: "devteam_user"
+  #     password: "StrongPassword"
+  #     authSource: "devteamDB"
+  # Optional. A full per-service connection URI, for the rare case where a service also needs
+  # different hosts or query parameters. Overrides mongoUri for that service only.
+  uris: {}
+  # uris:
+  #   uaa: "mongodb://uaa_user:StrongPassword@mongo-uaa.example.com:27017/uaaDB?authSource=uaaDB"
 
 # External Rabbitmq Configs
 oobeyaExternalRabbitmq:

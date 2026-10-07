@@ -147,6 +147,58 @@ oobeyaExternalMongo:
 
 You may rename these to match database names your DBA has already provisioned — the chart will still build a correct, valid URI for every service.
 
+### Per-database credentials
+
+By default every database is reached with the single user carried by `mongoUri`. If your DBA issued a **separate MongoDB user per database**, declare those users under `oobeyaExternalMongo.credentials`. The hosts, `replicaSet`, `tls` and every other query parameter still come from `mongoUri`; only the user info is swapped for that one service.
+
+```yaml
+oobeyaExternalMongo:
+  isExternal: true
+  mongoUri: "mongodb://mongo01.example.com:27017,mongo02.example.com:27017/anyDB?replicaSet=rs0&tls=true"
+  healthCheckHost: "mongo01.example.com"
+  healthCheckPort: "27017"
+  databases:
+    dashboard: "dashboardDB"
+    devteam: "devteamDB"
+    gitwiser: "gitwiserDB"
+    uaa: "uaaDB"
+    agilespace: "agilespaceDB"
+    addons: "addonsDB"
+    gateway: "gatewayDB"
+  credentials:
+    dashboard:
+      username: "dashboard_user"
+      password: "StrongPassword1"
+      authSource: "dashboardDB"
+    devteam:
+      username: "devteam_user"
+      password: "StrongPassword2"
+      authSource: "devteamDB"
+    # ... one entry per service
+```
+
+Notes:
+
+* **`authSource` matters.** Per-database users are usually created inside the database they own, so set `authSource` to that database name. When you omit it, the `authSource` of `mongoUri` is used — which authenticates against `admin` if that is what the shared URI says, and MongoDB will then reject the login.
+* Services you leave out of `credentials` keep using the credentials in `mongoUri`, so you can migrate one database at a time.
+* Percent-encode any reserved character in the password (`@` → `%40`, `:` → `%3A`, `/` → `%2F`, `?` → `%3F`, `#` → `%23`, `&` → `%26`, `%` → `%25`).
+* You can keep `mongoUri` credential-free (`mongodb://host:27017/?replicaSet=rs0`) when every service has its own entry.
+* To avoid plaintext passwords in `values.yaml`, pass them at install time (`--set oobeyaExternalMongo.credentials.dashboard.password=...`) or use the Vault / External Secrets path (`vault.enabled: true`), which bypasses chart-rendered secrets entirely.
+
+### Per-service connection URIs
+
+If a service needs more than different credentials — its own hosts, its own cluster, its own query string — give it a full URI under `oobeyaExternalMongo.uris`. It replaces `mongoUri` for that service only, and the database path is still normalised from `databases.<service>`.
+
+```yaml
+oobeyaExternalMongo:
+  isExternal: true
+  mongoUri: "mongodb://oobeya_user:StrongPassword@mongo.example.com:27017/anyDB?authSource=admin"
+  uris:
+    uaa: "mongodb+srv://uaa_user:StrongPassword@uaa-cluster.example.net/?retryWrites=true&authSource=uaaDB"
+```
+
+`credentials.<service>` is applied on top of a per-service URI as well, so you can use either field alone or both together.
+
 ### Single-instance MongoDB example
 
 ```yaml
