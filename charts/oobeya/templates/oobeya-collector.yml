@@ -46,6 +46,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ .Values.oobeyaCollector.configMapName }}
+            - secretRef:
+                name: {{ .Values.oobeyaRabbitmq.secretName }}
           env:
             - name: OOBEYA_COLLECTOR_PORT
               value: {{ .Values.oobeyaCollector.collectorPort | quote }}
