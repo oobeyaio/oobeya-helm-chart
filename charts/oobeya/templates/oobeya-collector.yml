@@ -1,0 +1,98 @@
+{{- if .Values.oobeyaCollector.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.oobeyaCollector.configMapName }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.oobeyaCollector.labels.app }}
+data:
+  OOBEYA_GATEWAY_INTERNAL_URL: "http://{{ .Values.oobeyaGateway.name }}:{{ .Values.oobeyaGateway.gatewayPort }}/"
+  {{- with .Values.oobeyaCollector.loggingLevel }}
+  OOBEYA_COLLECTOR_LOGGING_LEVEL: {{ . | quote }}
+  {{- end }}
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.oobeyaCollector.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.oobeyaCollector.labels.app }}
+spec:
+  replicas: {{ .Values.oobeya.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.oobeyaCollector.labels.app }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.oobeyaCollector.labels.app }}
+    spec:
+      imagePullSecrets:
+        - name: oobeya-secret
+      terminationGracePeriodSeconds: {{ .Values.oobeyaCollector.terminationGracePeriodSeconds }}
+      containers:
+        - name: {{ .Values.oobeyaCollector.name }}
+          image: "{{ .Values.oobeyaCollector.image.repository }}:{{ .Values.oobeyaCollector.image.tag | default .Values.beVersion }}"
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.oobeyaCollector.collectorPort }}
+            - name: management
+              containerPort: {{ .Values.oobeyaCollector.collectorApiPort }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.oobeyaCollector.configMapName }}
+          env:
+            - name: OOBEYA_COLLECTOR_PORT
+              value: {{ .Values.oobeyaCollector.collectorPort | quote }}
+            - name: OOBEYA_COLLECTOR_MANAGEMENT_PORT
+              value: {{ .Values.oobeyaCollector.collectorApiPort | quote }}
+          startupProbe:
+            httpGet:
+              path: {{ .Values.oobeyaCollector.livenessPath }}
+              port: management
+            periodSeconds: {{ .Values.oobeyaCollector.startupProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.oobeyaCollector.startupProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.oobeyaCollector.startupProbe.failureThreshold }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.oobeyaCollector.livenessPath }}
+              port: management
+            periodSeconds: {{ .Values.oobeyaCollector.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.oobeyaCollector.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.oobeyaCollector.livenessProbe.failureThreshold }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.oobeyaCollector.readinessPath }}
+              port: management
+            periodSeconds: {{ .Values.oobeyaCollector.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.oobeyaCollector.readinessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.oobeyaCollector.readinessProbe.failureThreshold }}
+          resources:
+            {{- toYaml .Values.oobeyaCollector.resources | nindent 12 }}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.oobeyaCollector.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.oobeyaCollector.labels.app }}
+spec:
+  type: ClusterIP
+  selector:
+    app: {{ .Values.oobeyaCollector.labels.app }}
+  ports:
+    - name: http
+      port: {{ .Values.oobeyaCollector.collectorPort }}
+      targetPort: {{ .Values.oobeyaCollector.collectorPort }}
+    - name: management
+      port: {{ .Values.oobeyaCollector.collectorApiPort }}
+      targetPort: {{ .Values.oobeyaCollector.collectorApiPort }}
+{{- end }}

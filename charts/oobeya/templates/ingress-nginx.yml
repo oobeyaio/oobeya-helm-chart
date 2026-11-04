@@ -47,4 +47,14 @@ spec:
             name: {{ .Values.oobeyaGatewayIngress.name }}
             port:
               number: {{ .Values.oobeyaGatewayIngress.gatewayPort }}
+      {{- if .Values.oobeyaCollector.enabled }}
+      # Collector Path
+      - path: {{ .Values.oobeyaCollector.ingress.path }}
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Values.oobeyaCollector.name }}
+            port:
+              number: {{ .Values.oobeyaCollector.collectorPort }}
+      {{- end }}
 {{- end }}

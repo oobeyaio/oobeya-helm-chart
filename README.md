@@ -361,3 +361,31 @@ helm upgrade oobeya oobeya/oobeya \
 For any post-installation support, please contact us at https://docs.oobeya.io or support@oobeya.io.
 
 
+
+## Oobeya Collector (Optional)
+
+Oobeya Collector is disabled by default. Enable it with `oobeyaCollector.enabled=true`.
+
+```
+helm upgrade oobeya oobeya/oobeya \
+  --reuse-values \
+  --set oobeyaCollector.enabled=true
+```
+
+When enabled, the chart:
+
+- Deploys `oobeya-collector` (Deployment, Service and `collector-configmap`) on ports `8097` (http) and `58097` (management).
+- Adds the `/claude` path to the enabled ingress (`ingressNginx`, `ingressTraefik` or `ingressOpenshift`), routed to `oobeya-collector:8097`.
+- Adds these variables to `addons-configmap`:
+  - `OOBEYA_COLLECTOR_PUBLIC_URL`: taken from `oobeyaDashboard.corsAllowedOrigin`
+  - `OOBEYA_COLLECTOR_INTERNAL_URL`: `http://oobeya-collector:58097/`
+  - `OOBEYA_GATEWAY_INTERNAL_URL`: `http://oobeya-gateway:8099/`
+
+| Value | Default | Description |
+|-------|---------|-------------|
+| `oobeyaCollector.enabled` | `false` | Deploys the collector |
+| `oobeyaCollector.image.tag` | `""` | Image tag. Empty uses `beVersion` |
+| `oobeyaCollector.ingress.path` | `/claude` | Ingress path routed to the collector |
+| `oobeyaCollector.loggingLevel` | `""` | Sets `OOBEYA_COLLECTOR_LOGGING_LEVEL` (e.g. `TRACE`) |
+| `oobeyaCollector.publicUrl` | `""` | Overrides `OOBEYA_COLLECTOR_PUBLIC_URL`. Empty uses `oobeyaDashboard.corsAllowedOrigin` |
+| `oobeyaCollector.resources` | `250m / 512Mi` request, `1Gi` limit | Container resources |

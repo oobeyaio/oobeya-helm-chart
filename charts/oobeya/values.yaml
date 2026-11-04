@@ -302,6 +302,43 @@ oobeyaRabbitmq:
         memory: 256Mi
     secretName: rabbitmq-secret
 
+oobeyaCollector:
+    enabled: false                                      # Set true to deploy oobeya-collector
+    name: oobeya-collector
+    image:
+      repository: oobeya.azurecr.io/oobeya-collector
+      tag: ""                                           # Empty -> uses .Values.beVersion
+    collectorPort: 8097
+    collectorApiPort: 58097
+    labels:
+      app: oobeya-collector
+    configMapName: collector-configmap
+    loggingLevel: ""                                    # e.g. "TRACE". Empty -> application default
+    publicUrl: ""                                       # Empty -> uses oobeyaDashboard.corsAllowedOrigin
+    terminationGracePeriodSeconds: 30
+    livenessPath: "/actuator/health/liveness"
+    readinessPath: "/actuator/health/readiness"
+    startupProbe:
+      periodSeconds: 10
+      timeoutSeconds: 3
+      failureThreshold: 30
+    livenessProbe:
+      periodSeconds: 10
+      timeoutSeconds: 3
+      failureThreshold: 3
+    readinessProbe:
+      periodSeconds: 10
+      timeoutSeconds: 3
+      failureThreshold: 3
+    resources:
+      limits:
+        memory: 1Gi
+      requests:
+        cpu: 250m
+        memory: 512Mi
+    ingress:
+      path: /claude                                     # Ingress path routed to collector (nginx / traefik / openshift)
+
 # External Mongo Configs
 oobeyaExternalMongo:
   isExternal: false

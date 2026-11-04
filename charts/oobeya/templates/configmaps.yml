@@ -94,6 +94,11 @@ data:
   RABBITMQ_HOST: "oobeya-rabbitmq"
   SSL_ENABLED: {{ ternary "true" "false" .Values.customSSL.secretSSL.enabled | quote }}
   SSL_CERT_FILE_NAMES: {{ join "," .Values.customSSL.secretSSL.certFileNames | quote }}
+  {{- if .Values.oobeyaCollector.enabled }}
+  OOBEYA_COLLECTOR_PUBLIC_URL: {{ .Values.oobeyaCollector.publicUrl | default .Values.oobeyaDashboard.corsAllowedOrigin | quote }}
+  OOBEYA_COLLECTOR_INTERNAL_URL: "http://{{ .Values.oobeyaCollector.name }}:{{ .Values.oobeyaCollector.collectorApiPort }}/"
+  OOBEYA_GATEWAY_INTERNAL_URL: "http://{{ .Values.oobeyaGateway.name }}:{{ .Values.oobeyaGateway.gatewayPort }}/"
+  {{- end }}
 
 ---
 
