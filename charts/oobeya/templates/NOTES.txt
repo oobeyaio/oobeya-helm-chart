@@ -1,0 +1,13 @@
+
+1. First, run the command '$ kubectl get pod -n oobeya' and wait for all services to be '1/1 Running'.
+
+2. By default, Oobeya broadcasts on port 80.
+
+3. When all services are '1/1 Running,' you can access Oobeya through your browser at 'http://your-IP-or-Domain'.
+
+4. The first screen you encounter requires you to set a password.
+
+5. After setting the password, you can log in with the username 'root' and the password you provided.
+
+6. This Chart provides allocated resources for Oobeya as '4vCPU and 16GB RAM'. Depending on the machine size, 'request' and 'limits' configurations can be adjusted.
+
