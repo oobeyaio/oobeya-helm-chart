@@ -43,6 +43,18 @@ spec:
             name: {{ .Values.oobeyaGatewayIngress.name }}
             port:
               number: {{ .Values.oobeyaGatewayIngress.gatewayPort }}
+      {{- if .Values.oobeyaDashboardIngress.ingress.mcp.enabled }}
+      {{- range .Values.oobeyaDashboardIngress.ingress.mcp.paths }}
+      # MCP / OAuth Path
+      - path: {{ .path }}
+        pathType: {{ .pathType | default "Prefix" }}
+        backend:
+          service:
+            name: {{ $.Values.oobeyaDashboardIngress.name }}
+            port:
+              number: {{ $.Values.oobeyaDashboardIngress.dashboardPort }}
+      {{- end }}
+      {{- end }}
       {{- if .Values.oobeyaCollector.enabled }}
       # Collector Path
       - path: {{ .Values.oobeyaCollector.ingress.path }}

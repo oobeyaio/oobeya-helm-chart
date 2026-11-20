@@ -66,6 +66,27 @@ spec:
   tls:
     termination: {{ .Values.ingressOpenshift.tls.termination }}
     insecureEdgeTerminationPolicy: {{ .Values.ingressOpenshift.tls.insecureEdgeTerminationPolicy }}
+{{- if .Values.oobeyaDashboardIngress.ingress.mcp.enabled }}
+{{- range $i, $p := .Values.oobeyaDashboardIngress.ingress.mcp.paths }}
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{ $.Values.oobeyaDashboardIngress.name }}-mcp-{{ $i }}
+  namespace: {{ $.Values.namespace }}
+spec:
+  host: {{ $.Values.ingressOpenshift.host | quote }}
+  path: {{ $p.path }}
+  to:
+    kind: Service
+    name: {{ $.Values.oobeyaDashboardIngress.name }}
+  port:
+    targetPort: {{ $.Values.oobeyaDashboardIngress.dashboardPort }}
+  tls:
+    termination: {{ $.Values.ingressOpenshift.tls.termination }}
+    insecureEdgeTerminationPolicy: {{ $.Values.ingressOpenshift.tls.insecureEdgeTerminationPolicy }}
+{{- end }}
+{{- end }}
 {{- if .Values.oobeyaCollector.enabled }}
 ---
 apiVersion: route.openshift.io/v1

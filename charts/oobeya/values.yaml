@@ -479,6 +479,18 @@ oobeyaDashboardIngress:
     enabled: true
     path: /api
     ingressClass: nginx
+    # MCP + OAuth endpoints routed to the dashboard service (nginx / traefik / openshift)
+    mcp:
+      enabled: true
+      paths:
+        - path: /mcp
+          pathType: Exact
+        - path: /.well-known/oauth-protected-resource
+          pathType: Prefix
+        - path: /oauth2
+          pathType: Prefix
+        - path: /.well-known/oauth-authorization-server
+          pathType: Prefix
 
 oobeyaGatewayIngress:
   name: oobeya-gateway
