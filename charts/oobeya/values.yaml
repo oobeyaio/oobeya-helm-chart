@@ -10,6 +10,11 @@ strategy:
 
 imagePullPolicy: Always
 
+# Container registry every Oobeya image is pulled from. Image names stay fixed (oobeya-dashboard, oobeya-ui, ...).
+# On-prem: set your own registry, optionally with a project path, e.g. "harbor.company.local/oobeya".
+# An image whose repository already contains a "/" is used as a full path and skips this registry.
+imageRegistry: oobeya.azurecr.io
+
 # Set Version
 uiVersion: latest
 beVersion: latest
@@ -28,7 +33,7 @@ storage:
 oobeyaMongo:
     name: oobeya-mongo
     image:
-      repository: oobeya.azurecr.io/oobeya-mongo-8.0
+      repository: oobeya-mongo-8.0
       tag: latest
     mongoPort: 27017
     labels:
@@ -57,7 +62,7 @@ oobeyaMongo:
 oobeyaDashboard:
     name: oobeya-dashboard
     image:
-      repository: oobeya.azurecr.io/oobeya-dashboard
+      repository: oobeya-dashboard
       tag: "{{ .Values.beVersion }}"
     dashboardPort: 8080
     dashboardApiPort: 58080
@@ -87,7 +92,7 @@ oobeyaDashboard:
 oobeyaGateway:
     name: oobeya-gateway
     image:
-      repository: oobeya.azurecr.io/oobeya-gateway
+      repository: oobeya-gateway
       tag: "{{ .Values.beVersion }}"
     gatewayPort: 8099
     gatewayApiPort: 58099
@@ -118,7 +123,7 @@ oobeyaGateway:
 oobeyaUi:
     name: oobeya-ui
     image:
-      repository: oobeya.azurecr.io/oobeya-ui
+      repository: oobeya-ui
       tag: "{{ .Values.uiVersion }}"
     uiPort: 8080
     uiApiPort: 8080
@@ -145,7 +150,7 @@ oobeyaUi:
 oobeyaGitwiser:
     name: oobeya-gitwiser
     image:
-      repository: oobeya.azurecr.io/oobeya-gitwiser
+      repository: oobeya-gitwiser
       tag: "{{ .Values.beVersion }}"
     gitwiserPort: 8077
     gitwiserApiPort: 58077
@@ -174,7 +179,7 @@ oobeyaGitwiser:
 oobeyaAddons:
     name: oobeya-addons
     image:
-      repository: oobeya.azurecr.io/oobeya-addons
+      repository: oobeya-addons
       tag: "{{ .Values.beVersion }}"
     addonsPort: 8079
     addonsApiPort: 58079
@@ -203,7 +208,7 @@ oobeyaAddons:
 oobeyaAgilespace:
     name: oobeya-agilespace
     image:
-      repository: oobeya.azurecr.io/oobeya-agilespace
+      repository: oobeya-agilespace
       tag: "{{ .Values.beVersion }}"
     agilespacePort: 8074
     agilespaceApiPort: 58074
@@ -232,7 +237,7 @@ oobeyaAgilespace:
 oobeyaDevteam:
     name: oobeya-devteam
     image:
-      repository: oobeya.azurecr.io/oobeya-devteam
+      repository: oobeya-devteam
       tag: "{{ .Values.beVersion }}"
     devteamPort: 8078
     devteamApiPort: 58078
@@ -261,7 +266,7 @@ oobeyaDevteam:
 oobeyaUaa:
     name: oobeya-uaa
     image:
-      repository: oobeya.azurecr.io/oobeya-uaa
+      repository: oobeya-uaa
       tag: "{{ .Values.beVersion }}"
     uaaPort: 10000
     uaaApiPort: 10001
@@ -290,7 +295,7 @@ oobeyaUaa:
 oobeyaRabbitmq:
     name: oobeya-rabbitmq
     image:
-      repository: oobeya.azurecr.io/oobeya-rabbitmq
+      repository: oobeya-rabbitmq
       tag: latest
     rabbitmqPort:  5672
     rabbitmqGuiPort: 15672
@@ -309,7 +314,7 @@ oobeyaCollector:
     enabled: false                                      # Set true to deploy oobeya-collector
     name: oobeya-collector
     image:
-      repository: oobeya.azurecr.io/oobeya-collector
+      repository: oobeya-collector
       tag: ""                                           # Empty -> uses .Values.beVersion
     collectorPort: 8097
     collectorApiPort: 58097
@@ -397,7 +402,7 @@ oobeyaExternalRabbitmq:
 
 initContainers:
   name: wait-oobeya-pods
-  image: oobeya.azurecr.io/oobeya-busybox:1.37
+  image: oobeya-busybox:1.37
   waitDashboardService: "oobeya-dashboard"
   waitUaaService: "oobeya-uaa"
   dashboardApiPort: 58080
@@ -456,7 +461,7 @@ ingressOpenshift:
 oobeyaUiIngress:
   name: oobeya-ui
   image:
-    repository: oobeya.azurecr.io/oobeya-ui
+    repository: oobeya-ui
     tag: "{{ .Values.uiVersion }}"
   uiPort: 8080
   uiApiPort: 8080
@@ -470,7 +475,7 @@ oobeyaUiIngress:
 oobeyaDashboardIngress:
   name: oobeya-dashboard
   image:
-    repository: oobeya.azurecr.io/oobeya-dashboard
+    repository: oobeya-dashboard
     tag: "{{ .Values.beVersion }}"
   dashboardPort: 8080
   labels:
@@ -495,7 +500,7 @@ oobeyaDashboardIngress:
 oobeyaGatewayIngress:
   name: oobeya-gateway
   image:
-    repository: oobeya.azurecr.io/oobeya-gateway
+    repository: oobeya-gateway
     tag: "{{ .Values.beVersion }}"
   gatewayPort: 8099
   labels:

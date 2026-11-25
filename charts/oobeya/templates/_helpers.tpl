@@ -133,3 +133,26 @@ Usage: include "oobeya.mongo.internalUri" (dict "root" $ "db" "dashboardDB")
 {{- $v := .root.Values -}}
 {{- printf "mongodb://%s:%s@%s:%v/%s?authSource=admin" (urlquery $v.oobeyaMongo.auth.username) (urlquery (include "oobeya.mongo.internalPassword" .root)) $v.oobeyaMongo.name $v.oobeyaMongo.mongoPort .db -}}
 {{- end -}}
+
+{{/*
+Build a full image reference from the shared registry and a fixed image name.
+
+Usage: include "oobeya.image" (dict "root" $ "repository" .Values.oobeyaUi.image.repository "tag" .Values.uiVersion)
+
+Result is <imageRegistry>/<repository>:<tag>. When repository already contains a "/"
+it is treated as a full path and imageRegistry is not prepended. When tag is empty no
+":<tag>" suffix is added (e.g. a repository that already carries its own tag).
+*/}}
+{{- define "oobeya.image" -}}
+{{- $registry := trimSuffix "/" (toString (default "" .root.Values.imageRegistry)) -}}
+{{- $repo := toString .repository -}}
+{{- $tag := toString (default "" .tag) -}}
+{{- if and $registry (not (contains "/" $repo)) -}}
+{{- $repo = printf "%s/%s" $registry $repo -}}
+{{- end -}}
+{{- if $tag -}}
+{{- printf "%s:%s" $repo $tag -}}
+{{- else -}}
+{{- $repo -}}
+{{- end -}}
+{{- end }}

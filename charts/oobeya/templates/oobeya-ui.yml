@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: {{ .Values.oobeyaUi.name }}
-          image: "{{ .Values.oobeyaUi.image.repository }}:{{ .Values.uiVersion }}"
+          image: {{ include "oobeya.image" (dict "root" $ "repository" .Values.oobeyaUi.image.repository "tag" .Values.uiVersion) | quote }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           ports:
             - containerPort: {{ .Values.oobeyaUi.uiPort }}

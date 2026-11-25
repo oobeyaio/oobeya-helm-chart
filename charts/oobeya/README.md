@@ -52,6 +52,22 @@ kubectl create secret docker-registry oobeya-secret \
   --namespace=oobeya
 ```
 
+## Image Registry (On-Prem)
+
+All images are pulled from `imageRegistry` (default `oobeya.azurecr.io`). Image names (`oobeya-dashboard`, `oobeya-ui`, ...) stay the same, so for an on-prem installation push the images to your own registry with the same names and set only the registry, optionally with a project path:
+
+```
+imageRegistry: harbor.company.local/oobeya
+```
+
+or on the command line:
+
+```
+--set imageRegistry=harbor.company.local/oobeya
+```
+
+Create the `oobeya-secret` pull secret above with `--docker-server` pointing to your registry. To pull a single image from somewhere else, give its `image.repository` as a full path (anything containing a `/`); the registry is then not prepended to that image.
+
 ## MongoDB Password
 
 When the internal MongoDB is used (`oobeyaExternalMongo.isExternal: false`, the default), you must set the MongoDB password with `oobeyaMongo.auth.password`. It is empty by default and the chart will not install or upgrade without it.

@@ -16,7 +16,7 @@ spec:
         app: {{ .Values.oobeyaDevteam.labels.app }}
     spec:
       containers:
-        - image: "{{ .Values.oobeyaDevteam.image.repository }}:{{ .Values.beVersion }}"
+        - image: {{ include "oobeya.image" (dict "root" $ "repository" .Values.oobeyaDevteam.image.repository "tag" .Values.beVersion) | quote }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           name: {{ .Values.oobeyaDevteam.name }}
           envFrom:
@@ -64,7 +64,7 @@ spec:
             {{- end }}
       initContainers:
         - name: {{ .Values.initContainers.name }}
-          image: {{ .Values.initContainers.image }}
+          image: {{ include "oobeya.image" (dict "root" $ "repository" .Values.initContainers.image) | quote }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           command: ['sh', '-c', "until wget --spider -q {{ .Values.initContainers.waitUaaService }}:{{ .Values.initContainers.uaaApiPort }}{{ .Values.oobeyaUaa.healthPaths }}; do echo waiting for myservice; sleep 2; done"]
       volumes:

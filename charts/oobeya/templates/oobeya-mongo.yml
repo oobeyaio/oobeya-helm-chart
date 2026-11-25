@@ -36,7 +36,7 @@ spec:
       containers:
         - name: {{ .Values.oobeyaMongo.name }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
-          image: {{ .Values.oobeyaMongo.image.repository }}
+          image: {{ include "oobeya.image" (dict "root" $ "repository" .Values.oobeyaMongo.image.repository "tag" .Values.oobeyaMongo.image.tag) | quote }}
           ports:
             - containerPort: {{ .Values.oobeyaMongo.mongoPort }}
           startupProbe:

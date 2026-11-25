@@ -20,7 +20,7 @@ spec:
       containers:
         - name: {{ .Values.oobeyaDashboard.name }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
-          image: "{{ .Values.oobeyaDashboard.image.repository }}:{{ .Values.beVersion }}"
+          image: {{ include "oobeya.image" (dict "root" $ "repository" .Values.oobeyaDashboard.image.repository "tag" .Values.beVersion) | quote }}
           envFrom:
             - configMapRef:
                 name: {{ .Values.oobeyaDashboard.configMapName }}
@@ -68,7 +68,7 @@ spec:
             {{- end }}
       initContainers:
         - name: {{ .Values.initContainers.name }}
-          image: {{ .Values.initContainers.image }}
+          image: {{ include "oobeya.image" (dict "root" $ "repository" .Values.initContainers.image) | quote }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           command: ['sh', '-c', 'until nc -zv {{ .Values.oobeyaExternalMongo.healthCheckHost }} {{ .Values.oobeyaExternalMongo.healthCheckPort }}; do echo waiting for mongodb; sleep 2; done;']
       volumes:

@@ -36,7 +36,7 @@ spec:
       terminationGracePeriodSeconds: {{ .Values.oobeyaCollector.terminationGracePeriodSeconds }}
       containers:
         - name: {{ .Values.oobeyaCollector.name }}
-          image: "{{ .Values.oobeyaCollector.image.repository }}:{{ .Values.oobeyaCollector.image.tag | default .Values.beVersion }}"
+          image: {{ include "oobeya.image" (dict "root" $ "repository" .Values.oobeyaCollector.image.repository "tag" (.Values.oobeyaCollector.image.tag | default .Values.beVersion)) | quote }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           ports:
             - name: http

@@ -19,7 +19,7 @@ spec:
       containers:
         - name: {{ .Values.oobeyaRabbitmq.name }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
-          image: {{ .Values.oobeyaRabbitmq.image.repository }}
+          image: {{ include "oobeya.image" (dict "root" $ "repository" .Values.oobeyaRabbitmq.image.repository "tag" .Values.oobeyaRabbitmq.image.tag) | quote }}
           envFrom:
             - secretRef:
                 name: {{ .Values.oobeyaRabbitmq.secretName }}

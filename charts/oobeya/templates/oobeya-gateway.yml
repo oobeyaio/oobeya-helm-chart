@@ -18,7 +18,7 @@ spec:
       containers:
         - name: {{ .Values.oobeyaGateway.name }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
-          image: "{{ .Values.oobeyaGateway.image.repository }}:{{ .Values.beVersion }}"
+          image: {{ include "oobeya.image" (dict "root" $ "repository" .Values.oobeyaGateway.image.repository "tag" .Values.beVersion) | quote }}
           envFrom:
             - configMapRef:
                 name: {{ .Values.oobeyaGateway.configMapName }}
@@ -62,7 +62,7 @@ spec:
             {{- end }}
       initContainers:
         - name: {{ .Values.initContainers.name }}
-          image: {{ .Values.initContainers.image }}
+          image: {{ include "oobeya.image" (dict "root" $ "repository" .Values.initContainers.image) | quote }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           command: ['sh', '-c', "until wget --spider -q {{ .Values.initContainers.waitUaaService }}:{{ .Values.initContainers.uaaApiPort }}{{ .Values.oobeyaUaa.healthPaths }}; do echo waiting for myservice; sleep 2; done"]
       volumes:
