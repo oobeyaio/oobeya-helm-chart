@@ -486,11 +486,11 @@ oobeyaDashboardIngress:
         - path: /mcp
           pathType: Exact
         - path: /.well-known/oauth-protected-resource
-          pathType: Prefix
+          pathType: ImplementationSpecific
         - path: /oauth2
           pathType: Prefix
         - path: /.well-known/oauth-authorization-server
-          pathType: Prefix
+          pathType: ImplementationSpecific
 
 oobeyaGatewayIngress:
   name: oobeya-gateway
